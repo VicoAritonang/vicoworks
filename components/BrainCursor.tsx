@@ -31,23 +31,24 @@ export function BrainCursor() {
     <>
       <NeuralNetwork isActive={isActive} />
 
-      {/* Floating Toggle Button */}
+      {/* Floating Toggle Button - Responsive positioning */}
       <motion.button
         onClick={() => setIsActive(!isActive)}
-        className={`fixed bottom-10 right-10 z-[60] p-4 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.3)] border border-cyan-500/50 backdrop-blur-md transition-all duration-300 ${
-          isActive ? 'bg-cyan-500 text-white rotate-180' : 'bg-black/50 text-cyan-400 hover:scale-110'
+        className={`fixed bottom-4 right-4 sm:bottom-10 sm:right-10 z-[60] p-3 sm:p-4 rounded-full shadow-[0_0_20px_rgba(6,182,212,0.3)] border border-cyan-500/50 backdrop-blur-md transition-all duration-300 ${
+          isActive ? 'bg-cyan-500 text-white rotate-180' : 'bg-black/50 text-cyan-400 hover:scale-110 active:scale-95'
         }`}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
+        aria-label="Toggle AI Neural Network"
       >
-        <Brain size={24} className={isActive ? "animate-pulse" : ""} />
+        <Brain size={20} className="sm:w-6 sm:h-6" />
       </motion.button>
 
-      {/* Custom Cursor */}
+      {/* Custom Cursor - Only show on desktop */}
       <AnimatePresence>
         {isActive && (
           <motion.div
-            className="fixed top-0 left-0 pointer-events-none z-[60] mix-blend-screen"
+            className="fixed top-0 left-0 pointer-events-none z-[60] mix-blend-screen hidden md:block"
             animate={{ x: mousePos.x - 16, y: mousePos.y - 16 }}
             transition={{ type: "tween", ease: "backOut", duration: 0.1 }}
           >
@@ -57,9 +58,6 @@ export function BrainCursor() {
                <div className="absolute inset-2 rounded-full bg-purple-500/50 blur-sm animate-pulse" />
                <div className="absolute -inset-4 border border-dashed border-purple-500/30 rounded-full animate-[spin_4s_linear_infinite_reverse]" />
             </div>
-            
-            {/* Trailing Particles - Simplified as user requested removal of old mouse effect, 
-                but this is part of the 'new' cursor itself. Keeping it minimal. */}
           </motion.div>
         )}
       </AnimatePresence>

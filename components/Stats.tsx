@@ -11,9 +11,9 @@ interface StatsProps {
 
 export function Stats({ data }: StatsProps) {
   return (
-    <section className="py-20 relative z-10">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+    <section className="py-12 sm:py-16 md:py-20 relative z-10">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
           {/* Visitor Count */}
           <motion.div 
             initial={{ opacity: 0, y: 50 }}
@@ -23,15 +23,15 @@ export function Stats({ data }: StatsProps) {
             className="relative group"
           >
             <div className="absolute inset-0 bg-cyan-500/10 rounded-2xl blur-xl group-hover:bg-cyan-500/20 transition-colors" />
-            <div className="relative p-8 rounded-2xl border border-cyan-500/30 bg-black/40 backdrop-blur-md flex items-center gap-6 hover:border-cyan-500/60 transition-all cursor-default">
-              <div className="p-4 rounded-full bg-cyan-500/10 text-cyan-400">
-                <Users size={32} />
+            <div className="relative p-6 sm:p-8 rounded-2xl border border-cyan-500/30 bg-black/40 backdrop-blur-md flex items-center gap-4 sm:gap-6 hover:border-cyan-500/60 transition-all cursor-default">
+              <div className="p-3 sm:p-4 rounded-full bg-cyan-500/10 text-cyan-400 shrink-0">
+                <Users size={24} className="sm:w-8 sm:h-8" />
               </div>
-              <div>
-                <div className="text-4xl font-bold text-white font-mono">
+              <div className="min-w-0">
+                <div className="text-3xl sm:text-4xl font-bold text-white font-mono">
                   {data.visitor_count?.toLocaleString()}
                 </div>
-                <div className="text-cyan-400/70 text-sm uppercase tracking-wider">Total Visitors</div>
+                <div className="text-cyan-400/70 text-xs sm:text-sm uppercase tracking-wider">Total Visitors</div>
               </div>
             </div>
           </motion.div>
@@ -46,19 +46,19 @@ export function Stats({ data }: StatsProps) {
               className="relative group cursor-pointer"
             >
               <div className="absolute inset-0 bg-purple-500/10 rounded-2xl blur-xl group-hover:bg-purple-500/30 transition-colors" />
-              <div className="relative p-8 rounded-2xl border border-purple-500/30 bg-black/40 backdrop-blur-md flex items-center gap-6 hover:border-purple-500/80 transition-all group-hover:scale-[1.02]">
-                <div className="p-4 rounded-full bg-purple-500/10 text-purple-400 group-hover:text-purple-300 transition-colors">
-                  <FolderGit2 size={32} />
+              <div className="relative p-6 sm:p-8 rounded-2xl border border-purple-500/30 bg-black/40 backdrop-blur-md flex items-center gap-4 sm:gap-6 hover:border-purple-500/80 transition-all group-hover:scale-[1.02]">
+                <div className="p-3 sm:p-4 rounded-full bg-purple-500/10 text-purple-400 group-hover:text-purple-300 transition-colors shrink-0">
+                  <FolderGit2 size={24} className="sm:w-8 sm:h-8" />
                 </div>
-                <div>
-                  <div className="text-4xl font-bold text-white font-mono group-hover:text-purple-200 transition-colors">
+                <div className="min-w-0 flex-1">
+                  <div className="text-3xl sm:text-4xl font-bold text-white font-mono group-hover:text-purple-200 transition-colors">
                     {data.project_count?.toLocaleString()}
                   </div>
-                  <div className="text-purple-400/70 text-sm uppercase tracking-wider group-hover:text-purple-300">
+                  <div className="text-purple-400/70 text-xs sm:text-sm uppercase tracking-wider group-hover:text-purple-300">
                     Projects Completed
                   </div>
                 </div>
-                <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-purple-500 text-sm">
+                <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-purple-500 text-xs sm:text-sm shrink-0 hidden sm:block">
                   View All →
                 </div>
               </div>
