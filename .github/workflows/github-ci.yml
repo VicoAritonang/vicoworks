@@ -1,0 +1,45 @@
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches: [main]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.GCP_REGION }}
+  SERVICE: ${{ secrets.GCP_SERVICE }}
+  REPO: vicoworks-repo
+  IMAGE: vicoworks
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auth GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker $REGION-docker.pkg.dev
+
+      - name: Build Image
+        run: |
+          docker build -t $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE:latest .
+
+      - name: Push Image
+        run: |
+          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE:latest
+
+      - name: Deploy
+        run: |
+          gcloud run deploy $SERVICE \
+            --image=$REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$IMAGE:latest \
+            --region=$REGION \
+            --platform=managed \
+            --allow-unauthenticated
