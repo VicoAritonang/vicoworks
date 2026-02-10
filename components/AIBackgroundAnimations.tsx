@@ -241,32 +241,89 @@ function FloatingAIElements() {
     { icon: '✨', delay: 10, duration: 17 },
   ];
 
+  // Define grid sections to distribute elements evenly
+  // This prevents clustering in corners, especially top-left
+  const getPositionForElement = (index: number) => {
+    // Create a 3x2 grid (6 sections for 6 elements)
+    const cols = 3;
+    const rows = 2;
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+    
+    // Each section is 33.33% x 50% of viewport
+    const sectionWidth = 100 / cols;
+    const sectionHeight = 100 / rows;
+    
+    // Base position at section start + random offset within section
+    // Keep elements away from edges (10% margin within each section)
+    const margin = 10;
+    const baseX = col * sectionWidth;
+    const baseY = row * sectionHeight;
+    const offsetX = margin + Math.random() * (sectionWidth - 2 * margin);
+    const offsetY = margin + Math.random() * (sectionHeight - 2 * margin);
+    
+    return {
+      x: baseX + offsetX,
+      y: baseY + offsetY,
+    };
+  };
+
+  // Generate animation targets that stay within assigned regions
+  const getAnimationTargets = (index: number) => {
+    const cols = 3;
+    const rows = 2;
+    const col = index % cols;
+    const row = Math.floor(index / cols);
+    
+    const sectionWidth = 100 / cols;
+    const sectionHeight = 100 / rows;
+    const margin = 10;
+    const baseX = col * sectionWidth;
+    const baseY = row * sectionHeight;
+    
+    // Generate two random positions within the same section for animation
+    const target1X = baseX + margin + Math.random() * (sectionWidth - 2 * margin);
+    const target1Y = baseY + margin + Math.random() * (sectionHeight - 2 * margin);
+    const target2X = baseX + margin + Math.random() * (sectionWidth - 2 * margin);
+    const target2Y = baseY + margin + Math.random() * (sectionHeight - 2 * margin);
+    
+    return [
+      { x: `${target1X}%`, y: `${target1Y}%` },
+      { x: `${target2X}%`, y: `${target2Y}%` },
+    ];
+  };
+
   return (
     <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-      {elements.map((el, i) => (
-        <motion.div
-          key={i}
-          className="absolute text-4xl opacity-20"
-          initial={{ 
-            x: `${Math.random() * 100}%`,
-            y: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            x: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
-            y: [`${Math.random() * 100}%`, `${Math.random() * 100}%`],
-            rotate: [0, 360],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: el.duration,
-            delay: el.delay,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        >
-          {el.icon}
-        </motion.div>
-      ))}
+      {elements.map((el, i) => {
+        const initialPos = getPositionForElement(i);
+        const animTargets = getAnimationTargets(i);
+        
+        return (
+          <motion.div
+            key={i}
+            className="absolute text-4xl opacity-10"
+            initial={{ 
+              x: `${initialPos.x}%`,
+              y: `${initialPos.y}%`,
+            }}
+            animate={{
+              x: [animTargets[0].x, animTargets[1].x, animTargets[0].x],
+              y: [animTargets[0].y, animTargets[1].y, animTargets[0].y],
+              rotate: [0, 360],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: el.duration,
+              delay: el.delay,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
+          >
+            {el.icon}
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
