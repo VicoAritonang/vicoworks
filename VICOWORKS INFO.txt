@@ -1,0 +1,3 @@
+VICOWORKS INFO
+supabase = chaikatrabant23@gmail.com, Pw : Coffin15678321!
+vercel = chaikatrabant23@gmail.com
