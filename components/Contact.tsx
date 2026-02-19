@@ -2,7 +2,7 @@
 
 import { HomeViewData } from '@/lib/data';
 import { motion } from 'framer-motion';
-import { Github, Linkedin, Mail, MessageCircle } from 'lucide-react';
+import { Github, Linkedin, MessageCircle } from 'lucide-react';
 
 interface ContactProps {
   data: HomeViewData;
@@ -10,40 +10,34 @@ interface ContactProps {
 
 export function Contact({ data }: ContactProps) {
   const contacts = [
-    { 
-      icon: <Github size={24} />, 
-      label: 'GitHub', 
+    {
+      icon: <Github size={24} />,
+      label: 'GitHub',
       value: data.Github || 'https://github.com/VicoAritonang', // Fallback if DB is empty 
       color: 'hover:text-white',
       bg: 'hover:bg-gray-800'
     },
-    { 
-      icon: <Linkedin size={24} />, 
-      label: 'LinkedIn', 
-      value: data.linkedIn, 
+    {
+      icon: <Linkedin size={24} />,
+      label: 'LinkedIn',
+      value: data.linkedIn,
       color: 'hover:text-blue-400',
       bg: 'hover:bg-blue-900/30'
     },
-    { 
-      icon: <MessageCircle size={24} />, 
-      label: 'WhatsApp', 
-      value: data.whatsapp ? `https://wa.me/${data.whatsapp}` : null, 
+    {
+      icon: <MessageCircle size={24} />,
+      label: 'WhatsApp',
+      value: data.whatsapp ? `https://wa.me/${data.whatsapp}` : null,
       color: 'hover:text-green-400',
       bg: 'hover:bg-green-900/30'
     },
-    { 
-      icon: <Mail size={24} />, 
-      label: 'Email', 
-      value: data.gmail ? `mailto:${data.gmail}` : null, 
-      color: 'hover:text-red-400',
-      bg: 'hover:bg-red-900/30'
-    }
+    // Gmail removed as per request
   ];
 
   return (
     <section className="py-12 sm:py-16 md:py-20 pb-20 sm:pb-24 md:pb-32 relative z-10">
       <div className="container mx-auto px-4 sm:px-6 text-center">
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -72,7 +66,7 @@ export function Contact({ data }: ContactProps) {
             )
           ))}
         </div>
-        
+
         <div className="mt-12 sm:mt-16 md:mt-20 text-gray-600 text-xs sm:text-sm">
           © {new Date().getFullYear()} Portfolio. Built with Next.js & Supabase.
         </div>
