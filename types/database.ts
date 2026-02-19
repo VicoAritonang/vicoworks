@@ -20,6 +20,7 @@ export interface Database {
           gmail: string | null
           linkedIn: string | null
           Github: string | null
+          resume_url: string | null
         }
         Insert: {
           id?: string
@@ -31,6 +32,7 @@ export interface Database {
           gmail?: string | null
           linkedIn?: string | null
           Github?: string | null
+          resume_url?: string | null
         }
         Update: {
           id?: string
@@ -42,6 +44,7 @@ export interface Database {
           gmail?: string | null
           linkedIn?: string | null
           Github?: string | null
+          resume_url?: string | null
         }
       }
       projects: {
@@ -90,16 +93,19 @@ export interface Database {
           id: string
           visitor_count: number | null
           project_count: number | null
+          system_in_production: number | null
         }
         Insert: {
           id?: string
           visitor_count?: number | null
           project_count?: number | null
+          system_in_production?: number | null
         }
         Update: {
           id?: string
           visitor_count?: number | null
           project_count?: number | null
+          system_in_production?: number | null
         }
       }
     }

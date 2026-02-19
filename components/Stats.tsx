@@ -2,7 +2,7 @@
 
 import { StatisticsData } from '@/lib/data';
 import { motion } from 'framer-motion';
-import { Users, FolderGit2 } from 'lucide-react';
+import { Server, FolderGit2 } from 'lucide-react';
 import Link from 'next/link';
 
 interface StatsProps {
@@ -15,7 +15,7 @@ export function Stats({ data }: StatsProps) {
       <div className="container mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-4xl mx-auto">
           {/* Visitor Count */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -25,20 +25,20 @@ export function Stats({ data }: StatsProps) {
             <div className="absolute inset-0 bg-cyan-500/10 rounded-2xl blur-xl group-hover:bg-cyan-500/20 transition-colors" />
             <div className="relative p-6 sm:p-8 rounded-2xl border border-cyan-500/30 bg-black/40 backdrop-blur-md flex items-center gap-4 sm:gap-6 hover:border-cyan-500/60 transition-all cursor-default">
               <div className="p-3 sm:p-4 rounded-full bg-cyan-500/10 text-cyan-400 shrink-0">
-                <Users size={24} className="sm:w-8 sm:h-8" />
+                <Server size={24} className="sm:w-8 sm:h-8" />
               </div>
               <div className="min-w-0">
                 <div className="text-3xl sm:text-4xl font-bold text-white font-mono">
-                  {data.visitor_count?.toLocaleString()}
+                  {data.system_in_production?.toLocaleString()}
                 </div>
-                <div className="text-cyan-400/70 text-xs sm:text-sm uppercase tracking-wider">Total Visitors</div>
+                <div className="text-cyan-400/70 text-xs sm:text-sm uppercase tracking-wider">System in Production</div>
               </div>
             </div>
           </motion.div>
 
           {/* Project Count - Clickable Link to /projects */}
           <Link href="/projects" className="block">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -55,7 +55,7 @@ export function Stats({ data }: StatsProps) {
                     {data.project_count?.toLocaleString()}
                   </div>
                   <div className="text-purple-400/70 text-xs sm:text-sm uppercase tracking-wider group-hover:text-purple-300">
-                    Projects Completed
+                    Projects
                   </div>
                 </div>
                 <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-purple-500 text-xs sm:text-sm shrink-0 hidden sm:block">

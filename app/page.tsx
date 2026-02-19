@@ -6,6 +6,7 @@ import { Contact } from '@/components/Contact';
 import { Background } from '@/components/Background';
 import { VisitorCounter } from '@/components/VisitorCounter';
 import { BrainCursor } from '@/components/BrainCursor';
+import { ProfileHighlight } from '@/components/ProfileHighlight';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -89,10 +90,11 @@ export default async function Home() {
         <VisitorCounter />
         <Background />
         <BrainCursor />
-        
+
         <Hero data={homeData} />
         <Stats data={statsData} />
         <Skills data={homeData} />
+        <ProfileHighlight data={homeData} />
         <Contact data={homeData} />
       </main>
     </>

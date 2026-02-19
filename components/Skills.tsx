@@ -19,7 +19,7 @@ export function Skills({ data }: SkillsProps) {
         <div className="flex flex-col md:flex-row gap-8 sm:gap-12 items-start">
           {/* Left: Title & GitHub CTA */}
           <div className="w-full md:w-1/3 space-y-6 sm:space-y-8">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -27,11 +27,11 @@ export function Skills({ data }: SkillsProps) {
               <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3">
                 <Terminal className="text-purple-500 shrink-0" size={32} />
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">
-                  Skills
+                  Core Expertise
                 </span>
               </h2>
               <p className="text-sm sm:text-base text-gray-400 leading-relaxed border-l-2 border-purple-500/30 pl-3 sm:pl-4">
-                My technical arsenal and capabilities. Constantly learning and upgrading my AI Engineering pathway.
+                Focused on building scalable AI systems, automation architecture, and cloud-native backend infrastructure.
               </p>
             </motion.div>
 
@@ -75,14 +75,14 @@ export function Skills({ data }: SkillsProps) {
                 <div className="flex justify-between items-start mb-2">
                   <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-600 group-hover:bg-cyan-500 transition-colors" />
                   <span className="text-[9px] sm:text-[10px] font-mono text-gray-600 group-hover:text-cyan-500/50">
-                     0{index + 1}
+                    0{index + 1}
                   </span>
                 </div>
                 <span className="font-medium text-sm sm:text-base text-gray-200 group-hover:text-white">
                   {skill.trim()}
                 </span>
                 <div className="w-full h-[2px] bg-gray-800 mt-2 sm:mt-3 overflow-hidden rounded-full">
-                  <motion.div 
+                  <motion.div
                     className="h-full bg-gradient-to-r from-purple-500 to-cyan-500"
                     initial={{ width: 0 }}
                     whileInView={{ width: '100%' }}
