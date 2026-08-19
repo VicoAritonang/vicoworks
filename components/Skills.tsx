@@ -2,18 +2,40 @@
 
 import { HomeViewData } from '@/lib/data';
 import { motion } from 'framer-motion';
-import { Code2, Github, Terminal } from 'lucide-react';
+import { Code2, Github, Terminal, Cpu } from 'lucide-react';
 
 interface SkillsProps {
   data: HomeViewData;
 }
 
 export function Skills({ data }: SkillsProps) {
-  const skills = data.skill?.split(';') || [];
+  const skills = data.skill?.split(';').map(s => s.trim()).filter(Boolean) || [];
 
   return (
-    <section className="py-12 sm:py-16 md:py-24 relative z-10 overflow-hidden bg-black/20">
+    <section id="skills" className="py-12 sm:py-16 md:py-24 relative z-10 overflow-hidden bg-black/20">
       <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#02020a]/80 to-transparent z-0" />
+
+      {/* Infinite skill marquee */}
+      {skills.length > 0 && (
+        <div className="relative z-10 mb-10 sm:mb-16 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_15%,black_85%,transparent)]" aria-hidden="true">
+          <div className="marquee-track gap-0 py-3 border-y border-white/5">
+            {[0, 1].map((copy) => (
+              <div key={copy} className="flex shrink-0">
+                {skills.map((skill, i) => (
+                  <span
+                    key={`${copy}-${i}`}
+                    className="flex items-center gap-3 px-6 sm:px-8 font-mono text-sm sm:text-base text-gray-500 whitespace-nowrap"
+                  >
+                    <Cpu size={14} className="text-cyan-500/60" />
+                    <span className="hover:text-cyan-400 transition-colors">{skill}</span>
+                    <span className="text-purple-500/40 ml-3">//</span>
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="flex flex-col md:flex-row gap-8 sm:gap-12 items-start">
@@ -24,6 +46,7 @@ export function Skills({ data }: SkillsProps) {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
+              <div className="font-mono text-[10px] sm:text-xs text-cyan-500/60 tracking-[0.3em] mb-2">[ 01 / EXPERTISE ]</div>
               <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3">
                 <Terminal className="text-purple-500 shrink-0" size={32} />
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400">
@@ -44,7 +67,8 @@ export function Skills({ data }: SkillsProps) {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="group flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-gradient-to-r from-gray-900 to-black border border-gray-800 hover:border-cyan-500/50 transition-all"
+                whileHover={{ y: -3 }}
+                className="group flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-gradient-to-r from-gray-900 to-black border border-gray-800 hover:border-cyan-500/50 transition-all hover:shadow-[0_10px_30px_rgba(6,182,212,0.1)]"
               >
                 <div className="p-2 sm:p-3 rounded-lg bg-white/5 group-hover:bg-cyan-500/10 transition-colors shrink-0">
                   <Github size={20} className="sm:w-6 sm:h-6 text-gray-300 group-hover:text-cyan-400" />
@@ -65,27 +89,31 @@ export function Skills({ data }: SkillsProps) {
             {skills.map((skill, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
-                whileHover={{ scale: 1.05, borderColor: 'rgba(6, 182, 212, 0.5)' }}
-                className="p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm flex flex-col justify-between min-h-[90px] sm:min-h-[100px] group cursor-default hover:bg-white/10 transition-all"
+                whileHover={{ scale: 1.05, y: -4 }}
+                className="relative p-3 sm:p-4 rounded-lg bg-white/5 border border-white/10 backdrop-blur-sm flex flex-col justify-between min-h-[90px] sm:min-h-[100px] group cursor-default hover:bg-white/10 hover:border-cyan-500/40 transition-all overflow-hidden"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-600 group-hover:bg-cyan-500 transition-colors" />
+                {/* Corner glow on hover */}
+                <div className="absolute -top-8 -right-8 w-16 h-16 bg-cyan-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+
+                <div className="flex justify-between items-start mb-2 relative z-10">
+                  <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-gray-600 group-hover:bg-cyan-500 group-hover:shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all" />
                   <span className="text-[9px] sm:text-[10px] font-mono text-gray-600 group-hover:text-cyan-500/50">
-                    0{index + 1}
+                    {String(index + 1).padStart(2, '0')}
                   </span>
                 </div>
-                <span className="font-medium text-sm sm:text-base text-gray-200 group-hover:text-white">
-                  {skill.trim()}
+                <span className="font-medium text-sm sm:text-base text-gray-200 group-hover:text-white relative z-10">
+                  {skill}
                 </span>
-                <div className="w-full h-[2px] bg-gray-800 mt-2 sm:mt-3 overflow-hidden rounded-full">
+                <div className="w-full h-[2px] bg-gray-800 mt-2 sm:mt-3 overflow-hidden rounded-full relative z-10">
                   <motion.div
                     className="h-full bg-gradient-to-r from-purple-500 to-cyan-500"
                     initial={{ width: 0 }}
                     whileInView={{ width: '100%' }}
+                    viewport={{ once: true }}
                     transition={{ delay: 0.5 + (index * 0.1), duration: 1 }}
                   />
                 </div>

@@ -1,0 +1,184 @@
+%==============================================================
+%  Vico Winner Sebastian Aritonang - Curriculum Vitae
+%  ATS-friendly, single-column. Compile with: pdflatex vico_aritonang_cv.tex
+%==============================================================
+\documentclass[a4paper,11pt]{article}
+
+% ---- Packages (kept minimal & common for ATS + portability) ----
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1.6cm]{geometry}
+\usepackage{lmodern}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+% ---- Colors ----
+\definecolor{linkcol}{HTML}{0E7490} % links only; all other text stays black
+
+% ---- Global look ----
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\hypersetup{colorlinks=true, urlcolor=linkcol, linkcolor=linkcol}
+
+% ---- Section formatting: single column, black heading + rule (ATS-safe) ----
+\titleformat{\section}
+  {\large\bfseries\scshape\color{black}}
+  {}{0em}{}[\color{black}\titlerule\vspace{-2pt}]
+\titlespacing*{\section}{0pt}{14pt}{7pt}
+
+% ---- Bullet lists: roomy BETWEEN bullets, tight from heading to first bullet ----
+\setlist[itemize]{leftmargin=1.4em, topsep=1pt, itemsep=3.5pt, parsep=0pt, label=\textbullet}
+
+% ---- Helper: an entry heading with a right-aligned date ----
+% \entry{Title}{Right/Date}{Subtitle}{Location-or-meta}
+\newcommand{\entry}[4]{%
+  \vspace{7pt}
+  {\bfseries #1}\hfill{\normalsize #2}\\[2pt]
+  {\itshape #3}\hfill{\itshape\small #4}\\[1pt]
+}
+
+\begin{document}
+
+%==============================================================
+%  HEADER
+%==============================================================
+{\Huge\bfseries Vico Winner Sebastian Aritonang}\\[6pt]
+{\large AI \& Automation Engineer \;|\; Software Engineer \;|\; Cloud \& DevOps}\\[8pt]
+\small
+Depok, West Java, Indonesia \;\textbar\;
+\href{mailto:vicoaritonang5@gmail.com}{vicoaritonang5@gmail.com} \;\textbar\;
++62 822-7399-2724\\[3pt]
+\href{https://www.linkedin.com/in/vico-winner-sebastian-aritonang-93a609249/}{linkedin.com/in/vico-winner-sebastian-aritonang} \;\textbar\;
+\href{https://github.com/VicoAritonang}{github.com/VicoAritonang} \;\textbar\;
+\href{https://vicoworks.com}{vicoworks.com}
+\normalsize
+
+%==============================================================
+%  SUMMARY
+%==============================================================
+\section{Summary}
+Information Systems undergraduate (7th semester) at the University of Indonesia and co-founder of an AI automation
+startup. I build production-grade agentic AI and automation systems that remove operational and workflow
+bottlenecks by designing LLM-powered agent orchestration, high-concurrency Go microservices, and cloud-native
+infrastructure on GCP with Docker. Comfortable across the stack (Next.js/React front ends, Go/Python back ends) with
+hands-on data analysis and machine-learning experience. Seeking an internship in \textbf{AI automation}, \textbf{DevOps},
+or \textbf{software engineering}.
+
+%==============================================================
+%  SKILLS
+%==============================================================
+\section{Technical Skills}
+\begin{itemize}
+  \item \textbf{AI \& Automation:} Agentic AI \& LLM application development, workflow orchestration (n8n), Retrieval-Augmented Generation (RAG), vector databases, LLM integration \& evaluation, Hugging Face, prompt engineering
+  \item \textbf{Backend:} Go (high-concurrency microservices), REST API architecture, system integration, distributed systems \& concurrency design
+  \item \textbf{Cloud \& DevOps:} Google Cloud Platform (GCP), AWS (Lambda, Step Functions, EventBridge), Docker \& containerization, CI/CD, Vercel, serverless \& cloud-native deployment
+  \item \textbf{Frontend:} Next.js, React, TypeScript, Tailwind CSS
+  \item \textbf{Data:} Data analysis, machine learning, PostgreSQL, Supabase
+  \item \textbf{Languages:} Go, Python, TypeScript/JavaScript, Java, Dart, C
+\end{itemize}
+
+%==============================================================
+%  EXPERIENCE
+%==============================================================
+\section{Experience}
+
+\entry{Co-Founder \textbar\ Avagenc}{Feb 2025 -- Present}{AI Automation Startup (Self-employed)}{Depok, Indonesia}
+\begin{itemize}
+  \item Co-founded \href{https://avagenc.com}{Avagenc}, building agentic AI systems that automate repetitive and complex business workflows for real operational use cases.
+  \item Lead end-to-end product engineering across the web platform and Android client, plus the underlying AI agent orchestration layer.
+  \item Design and deploy LLM-powered agents that integrate workflow automation, vector databases, and third-party APIs into reliable, reusable services.
+  \item Own deployment and DevOps: containerized services with Docker on cloud-native infrastructure, with a focus on maintainability and scalability.
+\end{itemize}
+
+\entry{IT Support (Part-time) \textbar\ Bimbel Wangsit Om Jer}{Dec 2025 -- Apr 2026}{Part-time}{On-site}
+\begin{itemize}
+  \item Provided monthly on-site IT support for the tuition center's bootcamps and tryout exams.
+  \item Ensured exam readiness and resolved technical issues before and during exams (including exam-platform and site errors) to keep sessions running without interruption.
+\end{itemize}
+
+\entry{LLM Evaluation Assistant \textbar\ Freelance}{Apr 2025 -- May 2025}{Freelance (Self-employed)}{Remote}
+\begin{itemize}
+  \item Evaluated a mathematical LLM across 200 questions, assessing answer correctness, reasoning validity, and potential hallucinations.
+  \item Delivered structured evaluation reports to support further model development and fine-tuning decisions.
+\end{itemize}
+
+\entry{Manager \textbar\ UI DigiTalk}{Apr 2024 -- Oct 2024}{Contract}{Depok, Indonesia}
+\begin{itemize}
+  \item Managed the event subcommittee for UI Digicamp, curating and organizing the technical subtopics presented.
+  \item Coordinated the team and timelines applying practical project-management practices.
+\end{itemize}
+
+\entry{Field Staff \textbar\ Pesta Rakyat Komputer}{Jan 2024 -- Apr 2024}{Contract}{Depok, Indonesia}
+\begin{itemize}
+  \item Managed on-site technical operations for a large faculty-wide computing event.
+\end{itemize}
+
+\entry{Secretary \textbar\ Natal KMK Teknik 2022}{Nov 2022 -- Jan 2023}{Contract}{Depok, Indonesia}
+\begin{itemize}
+  \item Handled proposals and event documentation submitted to the faculty; supported cross-team collaboration.
+\end{itemize}
+
+%==============================================================
+%  PROJECTS
+%==============================================================
+\section{Projects}
+
+\entry{Datafact \textbar\ AI Survey-Response Engine (Serverless)}{2025 -- 2026}{Live Product}{AWS Lambda, Step Functions, EventBridge, Generative AI}
+\begin{itemize}
+  \item Built an AI service that generates realistic, persona-targeted survey responses for Google Forms at scale, applying AI engineering to turn a chosen persona and a form into coherent, human-like answers.
+  \item Engineered a fully serverless AWS backend (Lambda, Step Functions, API Gateway HTTP APIs, EventBridge Scheduler) for elastic, event-driven, no-ops execution. Live at \href{https://www.datafact.site}{datafact.site}.
+\end{itemize}
+
+\entry{NusaVerify \textbar\ AI Hoax-Detection Engine}{2026}{Bank Indonesia Hackathon}{Next.js, LLM, Information Retrieval}
+\begin{itemize}
+  \item Developed an AI fact-checker that searches across multiple sources and computes a hoax/validity probability via a weighted-average validation algorithm.
+  \item Visualized the AI's full reasoning chain as an animated, interactive mind-map for transparent, explainable verdicts. Live at \href{https://nusaverify-web.vercel.app/}{nusaverify-web.vercel.app}.
+\end{itemize}
+
+\entry{Optimizing Robot Tutor Strategies \textbar\ Reinforcement Learning Research}{2026}{Academic Project, University of Indonesia}{Python, Gymnasium, Stable-Baselines3}
+\begin{itemize}
+  \item Formalized the Robot Tutor problem as a 1{,}440-state Markov Decision Process (24-hour clock, proficiency, fatigue, and engagement) and built \textbf{RobotTutor-v2}, a reusable Gymnasium environment compatible with Stable-Baselines3.
+  \item Trained and benchmarked four deep RL algorithms (DQN, PPO, TRPO, SAC) across independent seeds; Soft Actor-Critic reached the best policy with a 100\% expert-proficiency rate, far surpassing random and fixed-schedule baselines.
+\end{itemize}
+
+\entry{HandlerIndonesia \textbar\ Export-Facilitation Platform for MSMEs}{2025}{Top 50 Finalist, 1000x Innovation Challenge}{React / Next.js, Vercel}
+\begin{itemize}
+  \item Built an IT-based platform empowering Indonesian MSMEs (UMKM) to expand into global markets through export facilitation, bridging local producers and international demand with digital tools and guidance.
+  \item Selected as a \textbf{Top 50 Finalist} (Marvin Foundation $\times$ Universitas Indonesia $\times$ DSX Ventures). Live at \href{https://handlerindonesia.vercel.app}{handlerindonesia.vercel.app}.
+\end{itemize}
+
+\entry{Vicoworks \textbar\ Interactive Engineering Portfolio}{2025 -- 2026}{Personal Project}{Next.js, TypeScript, Supabase}
+\begin{itemize}
+  \item Designed and shipped an animated, database-driven portfolio (\href{https://vicoworks.com}{vicoworks.com}) with a Supabase/PostgreSQL backend and server-side rendering. Also authored \textbf{gmail-sender} (Go email-automation service) and concurrency simulations in Python.
+\end{itemize}
+
+%==============================================================
+%  EDUCATION
+%==============================================================
+\section{Education}
+\entry{University of Indonesia}{Aug 2023 -- Jul 2027 (Expected)}{B.Sc. in Information Systems}{Depok, Indonesia}
+\vspace{3pt}
+Previously enrolled in Mechanical Engineering at the University of Indonesia (Aug 2022 to Jun 2023) before transferring to Information Systems.
+
+%==============================================================
+%  CERTIFICATIONS, COMPETITIONS & AWARDS
+%==============================================================
+\section{Certifications, Competitions \& Awards}
+\begin{itemize}
+  \item \textbf{Top 50 Finalist, 1000x Innovation Challenge}, Marvin Foundation (with Universitas Indonesia \& DSX Ventures). Feb 2025.
+  \item \textbf{GEMASTIK XVIII, ICT Business Development Division (Divisi Pengembangan Bisnis TIK)}, National Student ICT Competition. Sep 2025. Credential ID 962/KMH01/KMH/2025.
+  \item \textbf{Falcon $\times$ Qatar Airways AI Infographic Competition}, Faculty of Information Technology, Universitas Pelita Harapan (UPH). Nov 2024. Credential ID 016/COM/FP14/FIT-UPH/XII/2024. (Data Analysis, Machine Learning)
+\end{itemize}
+
+%==============================================================
+%  VOLUNTEERING
+%==============================================================
+\section{Volunteering}
+\entry{Student Volunteer \& Scholarship Awardee \textbar\ Wahana Visi Indonesia}{Sep 2024 -- Jun 2025}{Civil Rights \& Social Action}{North Jakarta, Indonesia}
+\begin{itemize}
+  \item Volunteer teaching for vocational high-school students in North Jakarta as part of a community-empowerment program.
+\end{itemize}
+
+\end{document}

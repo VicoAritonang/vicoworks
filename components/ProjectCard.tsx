@@ -1,17 +1,18 @@
 'use client';
 
 import { ProjectData } from '@/lib/data';
-import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'framer-motion';
-import { Calendar, ExternalLink, Heart, Tag, Sparkles } from 'lucide-react';
+import { motion, useScroll, useTransform, useMotionValue, useSpring, useMotionTemplate } from 'framer-motion';
+import { Calendar, ExternalLink, Heart, Tag, Sparkles, Trophy } from 'lucide-react';
 import { useRef, useState, useEffect } from 'react';
 import { incrementProjectLike } from '@/app/actions';
 
 interface ProjectCardProps {
   project: ProjectData;
   index: number;
+  featured?: boolean;
 }
 
-export function ProjectCard({ project, index }: ProjectCardProps) {
+export function ProjectCard({ project, index, featured = false }: ProjectCardProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [likes, setLikes] = useState(project.like_count || 0);
   const [isLiking, setIsLiking] = useState(false);
@@ -24,6 +25,11 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
   
   const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [5, -5]), { stiffness: 300, damping: 30 });
   const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-5, 5]), { stiffness: 300, damping: 30 });
+
+  // Spotlight that follows the cursor inside the card
+  const spotX = useMotionValue(0);
+  const spotY = useMotionValue(0);
+  const spotlight = useMotionTemplate`radial-gradient(600px circle at ${spotX}px ${spotY}px, rgba(6,182,212,0.08), transparent 60%)`;
 
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -54,6 +60,8 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
     const centerY = rect.top + rect.height / 2;
     mouseX.set((e.clientX - centerX) / rect.width);
     mouseY.set((e.clientY - centerY) / rect.height);
+    spotX.set(e.clientX - rect.left);
+    spotY.set(e.clientY - rect.top);
   };
 
   const handleMouseLeave = () => {
@@ -124,6 +132,30 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
         
         {/* Glowing Border Effect */}
         <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-500/50 via-purple-500/50 to-cyan-500/50 rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500" />
+
+        {/* Cursor spotlight */}
+        <motion.div
+          className="absolute inset-0 rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+          style={{ background: spotlight }}
+        />
+
+        {/* Giant index watermark */}
+        <div className="absolute -top-6 sm:-top-10 right-4 sm:right-8 font-mono font-bold text-[80px] sm:text-[120px] leading-none text-white/[0.03] select-none pointer-events-none" aria-hidden="true">
+          {String(index + 1).padStart(2, '0')}
+        </div>
+
+        {/* Featured badge */}
+        {featured && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="absolute -top-3.5 left-6 sm:left-10 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/90 to-yellow-500/90 text-black font-mono font-bold text-[10px] sm:text-xs tracking-widest shadow-[0_0_25px_rgba(245,158,11,0.4)]"
+          >
+            <Trophy size={12} />
+            MOST POPULAR
+          </motion.div>
+        )}
 
         {/* AI Scanning Effect */}
         <motion.div
