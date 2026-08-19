@@ -1,8 +1,11 @@
-import { getProjects } from '@/lib/data';
+import { getProjects, getHomeView } from '@/lib/data';
 import { ProjectsList } from '@/components/ProjectsList';
+import { Shell } from '@/components/Shell';
 import { BrainCursor } from '@/components/BrainCursor';
 import { VisitorCounter } from '@/components/VisitorCounter';
 import { AIBackgroundAnimations } from '@/components/AIBackgroundAnimations';
+import { Navbar } from '@/components/Navbar';
+import { ScrambleText } from '@/components/ScrambleText';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -27,7 +30,7 @@ export const metadata: Metadata = {
 };
 
 export default async function ProjectsPage() {
-  const projects = await getProjects();
+  const [projects, homeData] = await Promise.all([getProjects(), getHomeView()]);
 
   // Structured Data for Projects Page
   const projectsStructuredData = {
@@ -59,28 +62,45 @@ export default async function ProjectsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(projectsStructuredData) }}
       />
+      <Navbar />
+      <Shell
+        data={{
+          email: homeData?.gmail || 'vicoaritonang5@gmail.com',
+          github: homeData?.Github || null,
+          linkedin: homeData?.linkedIn || null,
+          whatsapp: homeData?.whatsapp || null,
+          resumeUrl: homeData?.resume_url || null,
+          skills: homeData?.skill?.split(';').map(s => s.trim()).filter(Boolean) || [],
+          overview: homeData?.overview || null,
+        }}
+      />
       <main className="min-h-screen relative font-sans bg-[#030305] overflow-hidden">
         <VisitorCounter />
         <AIBackgroundAnimations />
         <BrainCursor />
 
-        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-10 relative z-10">
+        <div className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-6 sm:pb-10 relative z-10">
           {/* Header */}
           <div className="mb-8 sm:mb-12 flex flex-col gap-4 sm:gap-6">
-            <Link 
-              href="/" 
-              className="inline-flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors w-fit group text-sm sm:text-base"
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors w-fit group text-sm sm:text-base font-mono"
             >
               <ArrowLeft size={18} className="sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
-              Back to Home
+              cd ../home
             </Link>
-            
-            <div className="space-y-2">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight">
-                Project <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600">Archives</span>
+
+            <div className="space-y-3">
+              <div className="font-mono text-[10px] sm:text-xs text-cyan-500/60 tracking-[0.3em]">
+                [ DATABASE / PROJECTS ]
+              </div>
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight font-mono">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600">
+                  <ScrambleText text="Project Archives" delay={200} />
+                </span>
               </h1>
               <p className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl">
-                A collection of my work, experiments, and technological explorations. 
+                A collection of my work, experiments, and technological explorations.
                 Sorted by popularity.
               </p>
             </div>

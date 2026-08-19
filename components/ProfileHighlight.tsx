@@ -29,6 +29,7 @@ export function ProfileHighlight({ data }: ProfileHighlightProps) {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5 }}
+                        whileHover={{ y: -5 }}
                         className="relative group"
                     >
                         <div className="absolute inset-0 bg-cyan-500/10 rounded-2xl blur-xl group-hover:bg-cyan-500/20 transition-colors duration-300" />
@@ -68,6 +69,7 @@ export function ProfileHighlight({ data }: ProfileHighlightProps) {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.2 }}
+                        whileHover={{ y: -5 }}
                         className="relative group"
                     >
                         <div className="absolute inset-0 bg-purple-500/10 rounded-2xl blur-xl group-hover:bg-purple-500/20 transition-colors duration-300" />
@@ -87,7 +89,7 @@ export function ProfileHighlight({ data }: ProfileHighlightProps) {
                                     <button
                                         onClick={handleCopy}
                                         className="font-mono text-sm sm:text-base text-white truncate hover:text-purple-400 transition-colors text-left"
-                                        title="Click to copy"
+                                        title=""
                                     >
                                         vicoaritonang5@gmail.com
                                     </button>

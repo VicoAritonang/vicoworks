@@ -7,6 +7,9 @@ import { Background } from '@/components/Background';
 import { VisitorCounter } from '@/components/VisitorCounter';
 import { BrainCursor } from '@/components/BrainCursor';
 import { ProfileHighlight } from '@/components/ProfileHighlight';
+import { Preloader } from '@/components/Preloader';
+import { Navbar } from '@/components/Navbar';
+import { Shell } from '@/components/Shell';
 import type { Metadata } from 'next';
 
 export const dynamic = 'force-dynamic';
@@ -85,6 +88,19 @@ export default async function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(portfolioStructuredData) }}
+      />
+      <Preloader />
+      <Navbar />
+      <Shell
+        data={{
+          email: homeData.gmail || 'vicoaritonang5@gmail.com',
+          github: homeData.Github,
+          linkedin: homeData.linkedIn,
+          whatsapp: homeData.whatsapp,
+          resumeUrl: homeData.resume_url,
+          skills: homeData.skill?.split(';').map(s => s.trim()).filter(Boolean) || [],
+          overview: homeData.overview,
+        }}
       />
       <main className="min-h-screen relative overflow-x-hidden font-sans">
         <VisitorCounter />
