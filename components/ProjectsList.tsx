@@ -1,25 +1,102 @@
 'use client';
 
-import { useState, useMemo, useRef, useEffect } from 'react';
-import { ProjectData } from '@/lib/data';
-import { ProjectCard } from './ProjectCard';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Filter, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
+import { ArrowRight, ArrowUpRight, Search, X } from 'lucide-react';
+import type { ProjectSummary } from '@/content/types';
+import { StackList, StatusBadge } from './ui';
+import { VideoThumb } from './VideoThumb';
 
-interface ProjectsListProps {
-  projects: ProjectData[];
+/* An index, not a gallery. The previous version gave every project a 3D tilt,
+   a cursor spotlight, six floating particles and an autoplaying video embed,
+   which made three projects take longer to skim than thirty should. */
+
+function Row({ project }: { project: ProjectSummary }) {
+  const body = (
+    <>
+      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h3 className="display-3 text-fg transition-colors group-hover:text-accent">{project.name}</h3>
+        <span className="kicker">{project.year}</span>
+      </div>
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">{project.oneLiner}</p>
+    </>
+  );
+
+  return (
+    <article className="border-b border-line py-8">
+      <div className="flex flex-col gap-6 md:flex-row md:items-start md:justify-between md:gap-10">
+        {/* A still where there is one. It is the only image on the page, so a
+            row with a recorded walkthrough reads as more finished than one
+            without — which is exactly the ranking a reader should see. */}
+        {project.video && project.hasCaseStudy && (
+          <VideoThumb
+            video={project.video}
+            href={`/projects/${project.slug}`}
+            label="Demo"
+            className="md:w-56 md:shrink-0"
+          />
+        )}
+
+        <div className="min-w-0 flex-1">
+          {project.hasCaseStudy ? (
+            <Link href={`/projects/${project.slug}`} className="group block">
+              {body}
+            </Link>
+          ) : (
+            <div className="group">{body}</div>
+          )}
+          <StackList items={project.stack} className="mt-4" />
+        </div>
+
+        <div className="flex shrink-0 flex-col items-start gap-3 md:items-end">
+          <StatusBadge status={project.status} />
+          {project.hasCaseStudy && (
+            <Link
+              href={`/projects/${project.slug}`}
+              className="group inline-flex items-center gap-2 text-sm text-fg transition-colors hover:text-accent"
+            >
+              Case study
+              <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+            </Link>
+          )}
+          {project.links.live && (
+            <a
+              href={project.links.live}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-accent"
+            >
+              Visit site
+              <ArrowUpRight size={15} aria-hidden="true" />
+            </a>
+          )}
+          {project.links.paper && (
+            <a
+              href={project.links.paper}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-accent"
+            >
+              Paper (PDF)
+              <ArrowUpRight size={15} aria-hidden="true" />
+            </a>
+          )}
+        </div>
+      </div>
+    </article>
+  );
 }
 
-export function ProjectsList({ projects }: ProjectsListProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+export function ProjectsList({ projects }: { projects: ProjectSummary[] }) {
+  const [query, setQuery] = useState('');
+  const [category, setCategory] = useState('All');
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // Press "/" anywhere to jump into search
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      const typing = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      const typing =
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
       if (e.key === '/' && !typing) {
         e.preventDefault();
         searchRef.current?.focus();
@@ -29,145 +106,101 @@ export function ProjectsList({ projects }: ProjectsListProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  // Extract all unique categories
-  const allCategories = useMemo(() => {
-    const cats = new Set<string>();
-    projects.forEach(p => {
-      p.category?.split(';').forEach(c => cats.add(c.trim()));
-    });
-    return ['All', ...Array.from(cats)];
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    projects.forEach((p) => p.categories.forEach((c) => set.add(c)));
+    return ['All', ...Array.from(set).sort()];
   }, [projects]);
 
-  // Filter projects
-  const filteredProjects = useMemo(() => {
-    return projects.filter(project => {
-      const name = project.projectName?.toLowerCase() || '';
-      const query = searchQuery.toLowerCase();
-      const matchesSearch = name.includes(query);
-
-      const projectCategories = project.category?.split(';').map(c => c.trim()) || [];
-      const matchesCategory = selectedCategory === 'All' || projectCategories.includes(selectedCategory);
-
-      return matchesSearch && matchesCategory;
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return projects.filter((p) => {
+      const matchesQuery =
+        !q ||
+        p.name.toLowerCase().includes(q) ||
+        p.oneLiner.toLowerCase().includes(q) ||
+        p.stack.some((s) => s.toLowerCase().includes(q));
+      const matchesCategory = category === 'All' || p.categories.includes(category);
+      return matchesQuery && matchesCategory;
     });
-  }, [projects, searchQuery, selectedCategory]);
+  }, [projects, query, category]);
 
   return (
-    <div className="space-y-8 sm:space-y-12">
-      {/* Search & Filter Controls */}
-      <div className="sticky top-16 sm:top-20 md:top-24 z-30 w-full max-w-4xl mx-auto px-4 sm:px-0">
-        <div className="relative p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl space-y-3 sm:space-y-4 overflow-hidden">
-          {/* Ambient glow inside the panel */}
-          <div className="absolute -top-10 -left-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
-          <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
+    <div>
+      <div className="flex flex-col gap-4 border-y border-line py-4 md:flex-row md:items-center md:justify-between">
+        <div className="relative w-full md:max-w-xs">
+          <Search
+            size={15}
+            className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-faint"
+            aria-hidden="true"
+          />
+          <input
+            ref={searchRef}
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search — press /"
+            aria-label="Search projects"
+            className="w-full rounded-md border border-line bg-tint py-2 pr-8 pl-9 text-sm text-fg placeholder-faint focus:border-line-2 focus:outline-none"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              className="absolute top-1/2 right-2.5 -translate-y-1/2 text-faint transition-colors hover:text-fg"
+              aria-label="Clear search"
+            >
+              <X size={14} />
+            </button>
+          )}
+        </div>
 
-          {/* Search Input */}
-          <div className="relative">
-            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-            <input
-              ref={searchRef}
-              type="text"
-              placeholder="Search projects by name...  [ / ]"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg sm:rounded-xl py-2.5 sm:py-3 pl-10 sm:pl-12 pr-10 text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 focus:shadow-[0_0_20px_rgba(6,182,212,0.15)] transition-all"
-            />
-            <AnimatePresence>
-              {searchQuery && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.5 }}
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
-                  aria-label="Clear search"
-                >
-                  <X size={16} />
-                </motion.button>
-              )}
-            </AnimatePresence>
-          </div>
-
-          {/* Category Filter */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-            <Filter size={14} className="text-cyan-500 shrink-0 mr-1 sm:mr-2" />
-            {allCategories.map(category => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`relative px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
-                  selectedCategory === category
-                    ? 'text-white'
-                    : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white active:scale-95'
-                }`}
-              >
-                {selectedCategory === category && (
-                  <motion.span
-                    layoutId="category-pill"
-                    className="absolute inset-0 rounded-full bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)]"
-                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                  />
-                )}
-                <span className="relative z-10">{category}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Result count */}
-          <div className="font-mono text-[10px] sm:text-xs text-gray-500 tracking-widest flex items-center gap-2">
-            <span className="w-1 h-1 bg-cyan-500 rounded-full animate-pulse" aria-hidden="true" />
-            QUERY_RESULT: {filteredProjects.length} / {projects.length} PROJECT{projects.length !== 1 ? 'S' : ''}
-          </div>
+        {/* Masked at the right edge so an overflowing row reads as "there is
+            more" rather than as a chip clipped by accident. */}
+        <div
+          className="scrollbar-hide -mx-1 flex gap-1 overflow-x-auto px-1"
+          style={{
+            maskImage: 'linear-gradient(to right, black calc(100% - 24px), transparent)',
+            WebkitMaskImage: 'linear-gradient(to right, black calc(100% - 24px), transparent)',
+          }}
+        >
+          {categories.map((item) => (
+            <button
+              key={item}
+              onClick={() => setCategory(item)}
+              className={`rounded-full px-3 py-1.5 text-xs whitespace-nowrap transition-colors ${
+                category === item
+                  ? 'bg-accent text-accent-fg'
+                  : 'border border-line text-muted hover:border-line-2 hover:text-fg'
+              }`}
+            >
+              {item}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Projects Grid/List */}
-      <div className="space-y-16 sm:space-y-20 md:space-y-24 py-6 sm:py-10">
-        <AnimatePresence mode="popLayout">
-          {filteredProjects.length > 0 ? (
-            filteredProjects.map((project, index) => (
-              <motion.div
-                key={project.id}
-                layout
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.4 }}
-              >
-                <ProjectCard
-                  project={project}
-                  index={index}
-                  featured={index === 0 && selectedCategory === 'All' && !searchQuery}
-                />
-              </motion.div>
-            ))
-          ) : (
-            <motion.div
-              key="empty-state"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="text-center py-12 sm:py-20"
+      <div className="mt-2">
+        {filtered.length > 0 ? (
+          filtered.map((project) => <Row key={project.slug} project={project} />)
+        ) : (
+          <div className="py-16 text-center">
+            <p className="text-sm text-muted">Nothing matches that.</p>
+            <button
+              onClick={() => {
+                setQuery('');
+                setCategory('All');
+              }}
+              className="mt-4 rounded-full border border-line px-4 py-2 text-sm text-muted transition-colors hover:border-line-2 hover:text-fg"
             >
-              <motion.div
-                className="text-4xl sm:text-6xl mb-4"
-                animate={{ rotate: [0, -10, 10, 0] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                🔍
-              </motion.div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 font-mono">NO_SIGNAL_FOUND</h3>
-              <p className="text-sm sm:text-base text-gray-400 mb-6">Try adjusting your search criteria.</p>
-              <button
-                onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }}
-                className="px-5 py-2 rounded-full border border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10 transition-colors text-sm font-mono"
-              >
-                RESET_FILTERS
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              Clear filters
+            </button>
+          </div>
+        )}
       </div>
+
+      <p className="mt-6 font-mono text-xs text-faint">
+        {filtered.length} of {projects.length} projects
+      </p>
     </div>
   );
 }

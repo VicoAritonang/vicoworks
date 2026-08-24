@@ -1,145 +1,141 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Activity, ChevronUp } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Activity, X } from 'lucide-react';
+
+/* =========================================================================
+   RENDER STATS
+   -------------------------------------------------------------------------
+   Kept, but no longer worn. It used to sit on screen permanently labelled
+   SYS.TELEMETRY / STATUS: NOMINAL, running a requestAnimationFrame loop for
+   the lifetime of every page — including on phones, where `hidden lg:block`
+   made it invisible but not idle.
+
+   Now it is off by default and opened deliberately from the command palette
+   ("Show render stats") or the `stats` terminal command. The rAF loop starts
+   when the panel opens, stops when it closes, and pauses when the tab is
+   hidden. Numbers about the page belong to whoever asks for them.
+   ========================================================================= */
 
 interface PerformanceMemory {
   usedJSHeapSize: number;
-  jsHeapSizeLimit: number;
 }
 
-/** Live telemetry HUD: real FPS from rAF, JS heap when the browser exposes it. */
-export function SystemMonitor() {
-  const [openPanel, setOpenPanel] = useState(true);
-  const [fps, setFps] = useState(0);
-  const [mem, setMem] = useState<number | null>(null);
-  const [uptime, setUptime] = useState(0);
-  const frames = useRef(0);
-  const fpsHistory = useRef<number[]>([]);
-  const [, forceRender] = useState(0);
+const HISTORY = 30;
 
-  // FPS via requestAnimationFrame
+export function SystemMonitor() {
+  const [open, setOpen] = useState(false);
+  const [fps, setFps] = useState(0);
+  const [history, setHistory] = useState<number[]>([]);
+  const [mem, setMem] = useState<number | null>(null);
+  const frames = useRef(0);
+
   useEffect(() => {
-    let rafId: number;
+    const toggle = () => setOpen((v) => !v);
+    window.addEventListener('vw:toggle-stats', toggle);
+    return () => window.removeEventListener('vw:toggle-stats', toggle);
+  }, []);
+
+  const sample = useCallback(() => {
+    const perf = performance as unknown as { memory?: PerformanceMemory };
+    if (perf.memory) setMem(Math.round(perf.memory.usedJSHeapSize / 1048576));
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    let raf = 0;
     let last = performance.now();
+    let running = true;
 
     const loop = () => {
-      frames.current++;
+      if (!running) return;
+      frames.current += 1;
       const now = performance.now();
       if (now - last >= 500) {
         const current = Math.round((frames.current * 1000) / (now - last));
         setFps(current);
-        fpsHistory.current = [...fpsHistory.current.slice(-29), current];
-        forceRender(n => n + 1);
+        setHistory((prev) => [...prev.slice(-(HISTORY - 1)), current]);
+        sample();
         frames.current = 0;
         last = now;
       }
-      rafId = requestAnimationFrame(loop);
+      raf = requestAnimationFrame(loop);
     };
-    rafId = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(rafId);
-  }, []);
 
-  // Memory + uptime
-  useEffect(() => {
-    const id = setInterval(() => {
-      const perf = performance as unknown as { memory?: PerformanceMemory };
-      if (perf.memory) {
-        setMem(Math.round(perf.memory.usedJSHeapSize / 1048576));
+    const onVisibility = () => {
+      if (document.hidden) {
+        running = false;
+        cancelAnimationFrame(raf);
+      } else if (!running) {
+        running = true;
+        frames.current = 0;
+        last = performance.now();
+        raf = requestAnimationFrame(loop);
       }
-      setUptime(u => u + 1);
-    }, 1000);
-    return () => clearInterval(id);
-  }, []);
+    };
 
-  const fmtUptime = (s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-  };
+    raf = requestAnimationFrame(loop);
+    document.addEventListener('visibilitychange', onVisibility);
 
-  const fpsColor = fps >= 50 ? 'text-emerald-400' : fps >= 30 ? 'text-yellow-400' : 'text-red-400';
-  const maxFps = Math.max(60, ...fpsHistory.current);
+    return () => {
+      running = false;
+      cancelAnimationFrame(raf);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [open, sample]);
+
+  const peak = Math.max(60, ...history);
 
   return (
-    <div className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-[60] hidden lg:block select-none">
-      <AnimatePresence mode="wait">
-        {openPanel ? (
-          <motion.div
-            key="panel"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="w-56 rounded-xl border border-white/10 bg-black/70 backdrop-blur-xl p-3.5 font-mono shadow-2xl"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="flex items-center gap-2 text-[10px] tracking-[0.2em] text-cyan-400">
-                <Activity size={12} />
-                SYS.TELEMETRY
-              </span>
-              <button
-                onClick={() => setOpenPanel(false)}
-                className="text-gray-600 hover:text-white transition-colors rotate-180"
-                aria-label="Collapse telemetry"
-              >
-                <ChevronUp size={13} />
-              </button>
-            </div>
+    <AnimatePresence>
+      {open && (
+        <motion.aside
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 16 }}
+          transition={{ duration: 0.2 }}
+          className="fixed bottom-4 left-4 z-[60] hidden w-52 select-none rounded-xl border border-line bg-panel/95 p-3.5 font-mono shadow-[var(--shadow-panel)] backdrop-blur-2xl sm:bottom-6 sm:left-6 lg:block"
+        >
+          <div className="mb-3 flex items-center justify-between">
+            <span className="flex items-center gap-2 text-[10px] tracking-[0.18em] text-muted">
+              <Activity size={12} aria-hidden="true" />
+              RENDER STATS
+            </span>
+            <button
+              onClick={() => setOpen(false)}
+              className="text-faint transition-colors hover:text-fg"
+              aria-label="Close render stats"
+            >
+              <X size={13} />
+            </button>
+          </div>
 
-            {/* FPS graph */}
-            <div className="mb-3">
-              <div className="flex justify-between text-[10px] mb-1">
-                <span className="text-gray-500">RENDER.FPS</span>
-                <span className={fpsColor}>{fps}</span>
-              </div>
-              <div className="flex items-end gap-[2px] h-8">
-                {fpsHistory.current.map((f, i) => (
-                  <div
-                    key={i}
-                    className={`flex-1 rounded-sm ${f >= 50 ? 'bg-emerald-500/60' : f >= 30 ? 'bg-yellow-500/60' : 'bg-red-500/60'}`}
-                    style={{ height: `${Math.max(8, (f / maxFps) * 100)}%` }}
-                  />
-                ))}
-              </div>
+          <div className="mb-3">
+            <div className="mb-1 flex justify-between text-[10px]">
+              <span className="text-faint">FPS</span>
+              <span className="text-fg tabular-nums">{fps}</span>
             </div>
-
-            {/* Memory */}
-            {mem !== null && (
-              <div className="flex justify-between text-[10px] mb-1.5">
-                <span className="text-gray-500">JS.HEAP</span>
-                <span className="text-purple-400">{mem} MB</span>
-              </div>
-            )}
-
-            {/* Session */}
-            <div className="flex justify-between text-[10px] mb-1.5">
-              <span className="text-gray-500">SESSION.TIME</span>
-              <span className="text-cyan-400 tabular-nums">{fmtUptime(uptime)}</span>
+            <div className="flex h-8 items-end gap-[2px]" aria-hidden="true">
+              {history.map((value, i) => (
+                <div
+                  key={i}
+                  className={`flex-1 rounded-sm ${value >= 50 ? 'bg-line-2' : 'bg-accent'}`}
+                  style={{ height: `${Math.max(8, (value / peak) * 100)}%` }}
+                />
+              ))}
             </div>
+          </div>
+
+          {mem !== null && (
             <div className="flex justify-between text-[10px]">
-              <span className="text-gray-500">STATUS</span>
-              <span className="text-emerald-400 flex items-center gap-1">
-                <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
-                NOMINAL
-              </span>
+              <span className="text-faint">JS heap</span>
+              <span className="text-muted tabular-nums">{mem} MB</span>
             </div>
-          </motion.div>
-        ) : (
-          <motion.button
-            key="chip"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            onClick={() => setOpenPanel(true)}
-            className="flex items-center gap-2 px-3 py-2 rounded-full border border-white/10 bg-black/70 backdrop-blur-xl font-mono text-[10px] text-gray-400 hover:text-cyan-400 hover:border-cyan-500/40 transition-colors shadow-xl"
-            aria-label="Expand telemetry"
-          >
-            <Activity size={12} className="text-cyan-500" />
-            <span className={fpsColor}>{fps} FPS</span>
-          </motion.button>
-        )}
-      </AnimatePresence>
-    </div>
+          )}
+        </motion.aside>
+      )}
+    </AnimatePresence>
   );
 }

@@ -1,115 +1,73 @@
-import { getProjects, getHomeView } from '@/lib/data';
-import { ProjectsList } from '@/components/ProjectsList';
-import { Shell } from '@/components/Shell';
-import { BrainCursor } from '@/components/BrainCursor';
-import { VisitorCounter } from '@/components/VisitorCounter';
-import { AIBackgroundAnimations } from '@/components/AIBackgroundAnimations';
-import { Navbar } from '@/components/Navbar';
-import { ScrambleText } from '@/components/ScrambleText';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import type { Metadata } from 'next';
+import { allProjects } from '@/content/projects';
+import { toSummary } from '@/content/types';
+import { ProjectsList } from '@/components/ProjectsList';
 
-export const dynamic = 'force-dynamic';
+/* Static. Ordered by curation (`order` in content/projects.ts) rather than by
+   like count — "sorted by popularity" on a portfolio of your own work is a
+   ranking of nothing. */
 
 const siteUrl = 'https://vicoworks.com';
 
 export const metadata: Metadata = {
-  title: 'Projects - AI Engineering Portfolio',
-  description: 'Explore Vico Aritonang\'s AI engineering projects and software development work. Discover innovative AI solutions, machine learning applications, and cutting-edge software projects developed by an AI Engineer.',
-  keywords: ['Vico Aritonang Projects', 'AI Engineering Projects', 'AI Engineer Portfolio', 'Software Projects', 'Machine Learning Projects', 'Vico', 'AI Engineer'],
-  alternates: {
-    canonical: `${siteUrl}/projects`,
-  },
-  openGraph: {
-    title: 'Projects - Vico Aritonang AI Engineer Portfolio',
-    description: 'Explore innovative AI engineering projects and software development work by Vico Aritonang, an AI Engineer specializing in Artificial Intelligence and Machine Learning.',
-    url: `${siteUrl}/projects`,
-    type: 'website',
-  },
+  title: 'Projects',
+  description:
+    'Every project by Vico Aritonang — agentic AI systems, serverless backends, an RL research environment, and the things that did not fit on the homepage.',
+  alternates: { canonical: `${siteUrl}/projects` },
 };
 
-export default async function ProjectsPage() {
-  const [projects, homeData] = await Promise.all([getProjects(), getHomeView()]);
-
-  // Structured Data for Projects Page
-  const projectsStructuredData = {
+export default function ProjectsPage() {
+  const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'AI Engineering Projects by Vico Aritonang',
-    description: 'Collection of AI engineering and software development projects',
+    name: 'Projects by Vico Aritonang',
     url: `${siteUrl}/projects`,
-    itemListElement: projects.slice(0, 10).map((project, index) => ({
+    itemListElement: allProjects.map((project, index) => ({
       '@type': 'ListItem',
       position: index + 1,
       item: {
         '@type': 'CreativeWork',
-        name: project.projectName,
-        description: project.description,
-        url: project.project_url || `${siteUrl}/projects`,
-        creator: {
-          '@type': 'Person',
-          name: 'Vico Aritonang',
-          jobTitle: 'AI Engineer',
-        },
+        name: project.name,
+        description: project.oneLiner,
+        url: project.caseStudy
+          ? `${siteUrl}/projects/${project.slug}`
+          : (project.links.live ?? `${siteUrl}/projects`),
       },
     })),
   };
 
   return (
-    <>
+    <main id="main" className="relative px-4 pt-28 pb-16 sm:px-6 sm:pt-32">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(projectsStructuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
-      <Navbar />
-      <Shell
-        data={{
-          email: homeData?.gmail || 'vicoaritonang5@gmail.com',
-          github: homeData?.Github || null,
-          linkedin: homeData?.linkedIn || null,
-          whatsapp: homeData?.whatsapp || null,
-          resumeUrl: homeData?.resume_url || null,
-          skills: homeData?.skill?.split(';').map(s => s.trim()).filter(Boolean) || [],
-          overview: homeData?.overview || null,
-        }}
-      />
-      <main className="min-h-screen relative font-sans bg-[#030305] overflow-hidden">
-        <VisitorCounter />
-        <AIBackgroundAnimations />
-        <BrainCursor />
 
-        <div className="container mx-auto px-4 sm:px-6 pt-20 sm:pt-28 pb-6 sm:pb-10 relative z-10">
-          {/* Header */}
-          <div className="mb-8 sm:mb-12 flex flex-col gap-4 sm:gap-6">
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-gray-400 hover:text-cyan-400 transition-colors w-fit group text-sm sm:text-base font-mono"
-            >
-              <ArrowLeft size={18} className="sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
-              cd ../home
-            </Link>
+      <div className="container mx-auto">
+        <Link
+          href="/"
+          className="group inline-flex items-center gap-2 text-sm text-muted transition-colors hover:text-accent"
+        >
+          <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
+          Back home
+        </Link>
 
-            <div className="space-y-3">
-              <div className="font-mono text-[10px] sm:text-xs text-cyan-500/60 tracking-[0.3em]">
-                [ DATABASE / PROJECTS ]
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight font-mono">
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-600">
-                  <ScrambleText text="Project Archives" delay={200} />
-                </span>
-              </h1>
-              <p className="text-base sm:text-lg md:text-xl text-gray-400 max-w-2xl">
-                A collection of my work, experiments, and technological explorations.
-                Sorted by popularity.
-              </p>
-            </div>
-          </div>
+        <header className="mt-8 max-w-3xl">
+          <p className="kicker">Projects</p>
+          <h1 className="display-1 mt-3 text-fg">Everything I have built.</h1>
+          <p className="lede mt-5">
+            Shipped products, one research environment, and a couple of small tools. The three on the
+            homepage are the ones worth your time first.
+          </p>
+        </header>
 
-          {/* Main Content */}
-          <ProjectsList projects={projects} />
+        <div className="mt-14">
+          {/* Projected, not passed whole — see toSummary() in content/types.ts. */}
+          <ProjectsList projects={allProjects.map(toSummary)} />
         </div>
-      </main>
-    </>
+      </div>
+    </main>
   );
 }

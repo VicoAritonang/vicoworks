@@ -1,33 +1,51 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 
-/** Trailing ring + dot that follows the native cursor (fine pointers only). */
+/* Trailing ring + dot, fine pointers only.
+
+   The previous version called setVisible(true) on every single mousemove —
+   a React state update per pointer event, for a value that changes twice in a
+   session. Visibility and hover state are now written through motion values
+   and a ref guard, so moving the mouse re-renders nothing. */
+
 export function CustomCursor() {
   const [enabled, setEnabled] = useState(false);
-  const [hoveringInteractive, setHoveringInteractive] = useState(false);
-  const [visible, setVisible] = useState(false);
 
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
+  const opacity = useMotionValue(0);
+  const size = useMotionValue(32);
+
   const ringX = useSpring(x, { stiffness: 300, damping: 28, mass: 0.6 });
   const ringY = useSpring(y, { stiffness: 300, damping: 28, mass: 0.6 });
+  const ringSize = useSpring(size, { stiffness: 260, damping: 26 });
+
+  const hovering = useRef(false);
 
   useEffect(() => {
     if (!window.matchMedia('(pointer: fine)').matches) return;
+    // A capability read has to happen after hydration; doing it during render
+    // would make the server and client HTML disagree.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setEnabled(true);
 
     const onMove = (e: MouseEvent) => {
       x.set(e.clientX);
       y.set(e.clientY);
-      setVisible(true);
+      if (opacity.get() !== 1) opacity.set(1);
     };
+
     const onOver = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      setHoveringInteractive(!!target.closest('a, button, input, [role="button"]'));
+      const target = e.target as HTMLElement | null;
+      const next = Boolean(target?.closest('a, button, input, [role="button"]'));
+      if (next === hovering.current) return;
+      hovering.current = next;
+      size.set(next ? 48 : 32);
     };
-    const onLeave = () => setVisible(false);
+
+    const onLeave = () => opacity.set(0);
 
     window.addEventListener('mousemove', onMove, { passive: true });
     window.addEventListener('mouseover', onOver, { passive: true });
@@ -37,33 +55,27 @@ export function CustomCursor() {
       window.removeEventListener('mouseover', onOver);
       document.documentElement.removeEventListener('mouseleave', onLeave);
     };
-  }, [x, y]);
+  }, [x, y, opacity, size]);
 
   if (!enabled) return null;
 
   return (
     <div className="pointer-events-none fixed inset-0 z-[95]" aria-hidden="true">
-      {/* Trailing ring */}
       <motion.div
-        className="absolute rounded-full border border-cyan-400/60"
+        className="absolute rounded-full border border-line-2"
         style={{
           x: ringX,
           y: ringY,
+          width: ringSize,
+          height: ringSize,
+          opacity,
           translateX: '-50%',
           translateY: '-50%',
-          opacity: visible ? 1 : 0,
         }}
-        animate={{
-          width: hoveringInteractive ? 48 : 32,
-          height: hoveringInteractive ? 48 : 32,
-          borderColor: hoveringInteractive ? 'rgba(192,132,252,0.8)' : 'rgba(34,211,238,0.5)',
-        }}
-        transition={{ duration: 0.2 }}
       />
-      {/* Center dot */}
       <motion.div
-        className="absolute w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.9)]"
-        style={{ x, y, translateX: '-50%', translateY: '-50%', opacity: visible ? 1 : 0 }}
+        className="absolute h-1.5 w-1.5 rounded-full bg-accent"
+        style={{ x, y, opacity, translateX: '-50%', translateY: '-50%' }}
       />
     </div>
   );

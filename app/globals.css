@@ -1,17 +1,137 @@
 @import "tailwindcss";
 
+/* =========================================================================
+   GRAPHITE & EMBER
+   -------------------------------------------------------------------------
+   Cool neutral greys carrying a single warm accent. The warm/cool tension is
+   the whole idea — it is the only colour decision the page makes, so the
+   accent has to stay rare. Rules of the system:
+
+     - ONE accent. No second hue, no gradient text, no glows.
+     - Every panel uses the same surface + line pair. Panels do not get their
+       own colours; if two cards look different, that difference has to come
+       from content, not from a border hue.
+     - Emphasis comes from type weight, size and space. Colour is the last
+       resort, not the first.
+
+   Tokens live here and only here. :root is DARK, [data-theme="light"] is
+   LIGHT, and the two are written out in full rather than one deriving from
+   the other.
+   ========================================================================= */
+
 :root {
-  --background: #030305;
-  --foreground: #ededed;
-  --accent-cyan: #06b6d4;
-  --accent-purple: #a855f7;
+  color-scheme: dark;
+
+  /* The one deliberate aesthetic bet: an editorial serif for display type,
+     against mono labels and a warm accent. To undo it, point this at
+     var(--font-geist-sans) — nothing else in the codebase needs to change. */
+  --font-display-face: var(--font-instrument-serif), Georgia, 'Times New Roman', serif;
+
+  --bg: #0d0f12;
+  --panel: #14171c;
+  --surface: rgba(28, 32, 39, 0.66);
+  --tint: rgba(231, 229, 226, 0.045);
+  --line: #262a30;
+  --line-2: #3a4048;
+
+  --fg: #e7e5e2;
+  --muted: #8b8d91;
+  --faint: #62666b;
+
+  --accent: #d4744a;
+  --accent-hover: #e28a62;
+  --accent-fg: #17191c;
+
+  --ok: #7fa07a;
+  --err: #cc6a5e;
+
+  /* Background composition — two barely-there washes, no glow */
+  --bg-field: radial-gradient(120% 80% at 50% -10%, #15181d 0%, #101317 46%, #0d0f12 100%);
+  --bg-warm: radial-gradient(circle at 50% 50%, rgba(212, 116, 74, 0.07), transparent 66%);
+  --bg-cool: radial-gradient(circle at 50% 50%, rgba(148, 163, 184, 0.05), transparent 66%);
+  --bg-ground: linear-gradient(to top, #0d0f12 0%, transparent 40%);
+  --bg-vignette: radial-gradient(ellipse 95% 85% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.35) 100%);
+  --bg-dither: 0.02;
+
+  --shadow-panel: 0 18px 50px -12px rgba(0, 0, 0, 0.7);
+  --shadow-drop: rgba(0, 0, 0, 0.45);
+  --stroke-watermark: rgba(231, 229, 226, 0.035);
+
+  /* Architecture diagrams — aliases, not new hues. The diagram is drawn from
+     the same three neutrals as every panel, and the accent marks exactly one
+     thing: the path a request actually takes. */
+  --wire: #3a4048;
+  --wire-faint: #2b3037;
+  --node-bg: #14171c;
+  --node-line: #2f343b;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #faf9f7;
+  --panel: #ffffff;
+  --surface: rgba(255, 255, 255, 0.72);
+  --tint: rgba(23, 25, 28, 0.04);
+  --line: #e2e0dc;
+  --line-2: #cbc7c0;
+
+  --fg: #17191c;
+  --muted: #5f6469;
+  --faint: #8b8f94;
+
+  --accent: #b8501f;
+  --accent-hover: #973f16;
+  --accent-fg: #ffffff;
+
+  --ok: #3f6b3a;
+  --err: #a33a2c;
+
+  --bg-field: radial-gradient(120% 80% at 50% -10%, #ffffff 0%, #faf9f7 50%, #f3f1ed 100%);
+  --bg-warm: radial-gradient(circle at 50% 50%, rgba(184, 80, 31, 0.06), transparent 66%);
+  --bg-cool: radial-gradient(circle at 50% 50%, rgba(100, 116, 139, 0.06), transparent 66%);
+  --bg-ground: linear-gradient(to top, #f3f1ed 0%, transparent 40%);
+  --bg-vignette: radial-gradient(ellipse 95% 85% at 50% 45%, transparent 60%, rgba(23, 25, 28, 0.05) 100%);
+  --bg-dither: 0.01;
+
+  --shadow-panel: 0 14px 40px -14px rgba(23, 25, 28, 0.18);
+  --shadow-drop: rgba(23, 25, 28, 0.1);
+  --stroke-watermark: rgba(23, 25, 28, 0.05);
+
+  --wire: #b8b4ad;
+  --wire-faint: #d8d5cf;
+  --node-bg: #ffffff;
+  --node-line: #ddd9d3;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-surface: var(--surface);
+  --color-tint: var(--tint);
+  --color-line: var(--line);
+  --color-line-2: var(--line-2);
+
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+
+  --color-ok: var(--ok);
+  --color-err: var(--err);
+
+  --color-wire: var(--wire);
+  --color-wire-faint: var(--wire-faint);
+  --color-node-bg: var(--node-bg);
+  --color-node-line: var(--node-line);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-display-face);
 }
 
 html {
@@ -19,17 +139,17 @@ html {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--fg);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ---------- Selection ---------- */
 ::selection {
-  background: rgba(6, 182, 212, 0.35);
-  color: #fff;
-  text-shadow: 0 0 8px rgba(6, 182, 212, 0.8);
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  color: var(--fg);
 }
 
 /* ---------- Scrollbar ---------- */
@@ -37,66 +157,45 @@ body {
   width: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: #030305;
+  background: var(--bg);
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, rgba(6, 182, 212, 0.5), rgba(168, 85, 247, 0.5));
+  background: var(--line-2);
   border-radius: 10px;
-  border: 2px solid #030305;
+  border: 3px solid var(--bg);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, rgba(6, 182, 212, 0.8), rgba(168, 85, 247, 0.8));
+  background: var(--accent);
+}
+
+/* ---------- Section kicker ----------
+   The small mono label above a heading. Carries hierarchy through letter
+   spacing and size rather than through colour. */
+.kicker {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* ---------- Theme toggle icons ----------
+   Which icon shows is a pure function of the active theme, so CSS decides it
+   rather than React state that the server cannot know. */
+.theme-icon-light {
+  display: none;
+}
+[data-theme='light'] .theme-icon-light {
+  display: block;
+}
+[data-theme='light'] .theme-icon-dark {
+  display: none;
 }
 
 /* ---------- Global keyframes ---------- */
-@keyframes rain {
-  0% { transform: translateY(-100%); opacity: 0; }
-  50% { opacity: 1; }
-  100% { transform: translateY(100vh); opacity: 0; }
-}
-
-@keyframes twinkle {
-  0%, 100% { opacity: 0.15; transform: scale(1); }
-  50% { opacity: 0.9; transform: scale(1.3); }
-}
-
-@keyframes shooting-star {
-  0% { transform: translateX(0) translateY(0) rotate(-35deg); opacity: 0; }
-  5% { opacity: 1; }
-  40% { opacity: 1; }
-  100% { transform: translateX(-60vw) translateY(40vh) rotate(-35deg); opacity: 0; }
-}
-
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
-}
-
-@keyframes aurora-drift {
-  0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
-  33% { transform: translate(4%, -3%) rotate(4deg) scale(1.08); }
-  66% { transform: translate(-3%, 4%) rotate(-3deg) scale(0.96); }
-}
-
-@keyframes glitch-shift-1 {
-  0%, 100% { clip-path: inset(0 0 92% 0); transform: translate(-3px, -2px); }
-  20% { clip-path: inset(20% 0 58% 0); transform: translate(3px, 1px); }
-  40% { clip-path: inset(48% 0 30% 0); transform: translate(-3px, 2px); }
-  60% { clip-path: inset(70% 0 8% 0); transform: translate(3px, -1px); }
-  80% { clip-path: inset(10% 0 75% 0); transform: translate(-2px, 2px); }
-}
-
-@keyframes glitch-shift-2 {
-  0%, 100% { clip-path: inset(85% 0 4% 0); transform: translate(3px, 2px); }
-  25% { clip-path: inset(35% 0 45% 0); transform: translate(-3px, -1px); }
-  50% { clip-path: inset(5% 0 80% 0); transform: translate(2px, 1px); }
-  75% { clip-path: inset(60% 0 20% 0); transform: translate(-3px, 2px); }
-}
-
-@keyframes border-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
 }
 
 @keyframes blink-caret {
@@ -104,57 +203,22 @@ body {
   50% { opacity: 0; }
 }
 
-/* ---------- Glitch text (activate with .glitch-hover:hover) ---------- */
-.glitch-wrap {
-  position: relative;
-  display: inline-block;
-}
-.glitch-wrap .glitch-layer {
+/* ---------- Dither ----------
+   A near-invisible static noise layer. Its only job is to break up the wide
+   background gradients so they do not band on 8-bit displays. */
+.dither-overlay {
   position: absolute;
   inset: 0;
-  opacity: 0;
   pointer-events: none;
-}
-.glitch-wrap:hover .glitch-layer-1 {
-  opacity: 0.8;
-  color: #22d3ee;
-  animation: glitch-shift-1 0.65s steps(2, jump-none) infinite;
-}
-.glitch-wrap:hover .glitch-layer-2 {
-  opacity: 0.8;
-  color: #c084fc;
-  animation: glitch-shift-2 0.65s steps(2, jump-none) infinite reverse;
-}
-
-/* ---------- Film grain ---------- */
-.noise-overlay {
-  position: fixed;
-  inset: -50%;
-  width: 200%;
-  height: 200%;
-  pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 250 250' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  opacity: 0.035;
-  animation: grain-shift 8s steps(10) infinite;
-}
-@keyframes grain-shift {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-5%, -5%); }
-  20% { transform: translate(-10%, 5%); }
-  30% { transform: translate(5%, -10%); }
-  40% { transform: translate(-5%, 15%); }
-  50% { transform: translate(-10%, 5%); }
-  60% { transform: translate(15%, 0); }
-  70% { transform: translate(0, 10%); }
-  80% { transform: translate(-15%, 0); }
-  90% { transform: translate(10%, 5%); }
+  opacity: var(--bg-dither);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* ---------- Marquee ---------- */
 .marquee-track {
   display: flex;
   width: max-content;
-  animation: marquee 30s linear infinite;
+  animation: marquee 34s linear infinite;
 }
 .marquee-track:hover {
   animation-play-state: paused;
@@ -169,13 +233,6 @@ body {
   scrollbar-width: none;
 }
 
-/* ---------- Animated gradient border ---------- */
-.gradient-border-flow {
-  background: linear-gradient(90deg, rgba(6,182,212,0.6), rgba(168,85,247,0.6), rgba(6,182,212,0.6));
-  background-size: 200% 200%;
-  animation: border-flow 4s ease infinite;
-}
-
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -187,5 +244,176 @@ body {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Type scale ----------
+   Three display sizes and one lede, so headings stop being assembled out of
+   ad-hoc `text-3xl sm:text-4xl md:text-5xl` triples at each call site. Serif
+   needs slightly tighter leading than the sans it replaces. */
+.display-1 {
+  font-family: var(--font-display-face);
+  font-weight: 400;
+  font-size: clamp(2.5rem, 7vw, 5.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.display-2 {
+  font-family: var(--font-display-face);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 4vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.display-3 {
+  font-family: var(--font-display-face);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.lede {
+  font-size: clamp(1.0625rem, 1.5vw, 1.25rem);
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+.prose-body {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--fg);
+  max-width: 68ch;
+}
+
+/* ---------- Section rhythm ----------
+   Every section on the page breathes at the same interval. */
+.section {
+  padding-block: clamp(4rem, 10vw, 7.5rem);
+  position: relative;
+  z-index: 10;
+}
+
+.section-divider {
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- Inline link ----------
+   Underline is the affordance; the accent only shows on intent. */
+.link {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-color: var(--line-2);
+  text-underline-offset: 0.22em;
+  transition: color 0.18s ease, text-decoration-color 0.18s ease;
+}
+.link:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+
+/* ---------- Focus ----------
+   Keyboard users get a visible ring everywhere, in one place. */
+:where(a, button, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ---------- Horizontal overflow container ----------
+   Wide diagrams scroll inside themselves; the page body never does. */
+.scroll-x {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  /* Fades both edges so a diagram wider than the screen reads as scrollable.
+     When it fits it is centred, the edges are empty, and the mask is
+     invisible -- so this can apply unconditionally. */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black 18px,
+    black calc(100% - 18px),
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    black 18px,
+    black calc(100% - 18px),
+    transparent 100%
+  );
+}
+
+/* A left-aligned diagram has nothing to its left to fade into, so the
+   leading edge of its first node would just look clipped. This variant keeps
+   the "there is more" fade on the trailing edge only. Declared after
+   `.scroll-x` so it wins on source order. */
+.scroll-x-end {
+  mask-image: linear-gradient(to right, black calc(100% - 18px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 18px), transparent 100%);
+}
+
+/* ---------- Entrance ----------
+   A CSS rise rather than a JS one. It starts at first paint instead of after
+   hydration, and it is never applied to an LCP element — the headline is
+   painted opaque and stays that way. The reduced-motion block above collapses
+   the duration, and `both` leaves the element at its final state. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ---------- Anchor offset ----------
+   The header is fixed, so a jump to #skills used to park the heading
+   underneath it. Every anchor target reserves the header's height. */
+section[id],
+[id]:target {
+  scroll-margin-top: 5.5rem;
+}
+
+/* ---------- Diagram flow pulse ----------
+   Driven by CSS rather than by a JS branch on prefers-reduced-motion. A
+   branch changed the rendered element between server and client, which React
+   reported as a hydration mismatch and repaired by throwing the tree away.
+   Here the markup is identical either way and only the painting differs. */
+.flow {
+  stroke-dasharray: 0.16 1;
+  stroke-dashoffset: 1.16;
+}
+
+.flow-run {
+  animation: flow-run 2.4s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
+}
+
+@keyframes flow-run {
+  from {
+    stroke-dashoffset: 1.16;
+  }
+  to {
+    stroke-dashoffset: -0.16;
+  }
+}
+
+/* No pulse to follow, so the route is simply marked. */
+@media (prefers-reduced-motion: reduce) {
+  .flow {
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+    opacity: 0.45;
   }
 }

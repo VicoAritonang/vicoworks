@@ -1,33 +1,27 @@
-import { MetadataRoute } from 'next';
-import { getProjects } from '@/lib/data';
+import type { MetadataRoute } from 'next';
+import { caseStudySlugs } from '@/content/projects';
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://vicoworks.com';
-  
-  // Get projects for dynamic sitemap
-  const projects = await getProjects();
-  
-  const projectUrls = projects.map((project) => ({
-    url: `${baseUrl}/projects`,
-    lastModified: project.finishedAt ? new Date(project.finishedAt) : new Date(),
-    changeFrequency: 'weekly' as const,
+/* The previous version emitted one entry per project — every one of them
+   pointing at the same /projects URL. Now each case study has a real address. */
+
+const baseUrl = 'https://vicoworks.com';
+
+export default function sitemap(): MetadataRoute.Sitemap {
+  const caseStudies = caseStudySlugs.map((slug) => ({
+    url: `${baseUrl}/projects/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
 
   return [
-    {
-      url: baseUrl,
-      lastModified: new Date(),
-      changeFrequency: 'daily',
-      priority: 1,
-    },
+    { url: baseUrl, lastModified: new Date(), changeFrequency: 'monthly', priority: 1 },
     {
       url: `${baseUrl}/projects`,
       lastModified: new Date(),
-      changeFrequency: 'weekly',
+      changeFrequency: 'monthly',
       priority: 0.9,
     },
-    ...projectUrls,
+    ...caseStudies,
   ];
 }
-

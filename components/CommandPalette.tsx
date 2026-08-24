@@ -1,13 +1,30 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
-  Home, FolderGit2, Cpu, Mail, Github, Linkedin, MessageCircle,
-  FileText, TerminalSquare, Zap, Copy, Check, CornerDownLeft, Search,
+  Activity,
+  Check,
+  Copy,
+  CornerDownLeft,
+  FileText,
+  FolderGit2,
+  Github,
+  Home,
+  Layers,
+  Linkedin,
+  Mail,
+  Search,
+  SunMoon,
+  TerminalSquare,
 } from 'lucide-react';
-import type { ShellData } from './Shell';
+import { profile } from '@/content/profile';
+import { featuredProjects } from '@/content/projects';
+import { applyTheme } from './theme';
+
+/* The one interactive flourish that is genuinely useful rather than
+   decorative: a technical visitor tries ⌘K on reflex, and it works. */
 
 interface Command {
   id: string;
@@ -18,7 +35,7 @@ interface Command {
   run: () => void;
 }
 
-export function CommandPalette({ data }: { data: ShellData }) {
+export function CommandPalette() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -33,62 +50,148 @@ export function CommandPalette({ data }: { data: ShellData }) {
     setSelected(0);
   }, []);
 
-  const commands = useMemo<Command[]>(() => {
-    const cmds: Command[] = [
-      { id: 'home', label: 'Go to Home', hint: 'Landing page', group: 'NAVIGATE', icon: <Home size={16} />, run: () => router.push('/#hero') },
-      { id: 'projects', label: 'Go to Projects', hint: 'Project archives', group: 'NAVIGATE', icon: <FolderGit2 size={16} />, run: () => router.push('/projects') },
-      { id: 'skills', label: 'Go to Expertise', hint: 'Skills & stack', group: 'NAVIGATE', icon: <Cpu size={16} />, run: () => router.push('/#skills') },
-      { id: 'contact', label: 'Go to Contact', hint: 'Transmission', group: 'NAVIGATE', icon: <Mail size={16} />, run: () => router.push('/#contact') },
+  const commands = useMemo<Command[]>(
+    () => [
       {
-        id: 'copy-email', label: 'Copy Email Address', hint: data.email, group: 'ACTIONS',
-        icon: copied ? <Check size={16} className="text-emerald-400" /> : <Copy size={16} />,
+        id: 'home',
+        label: 'Home',
+        group: 'Navigate',
+        icon: <Home size={16} />,
+        run: () => router.push('/#hero'),
+      },
+      {
+        id: 'work',
+        label: 'Selected work',
+        group: 'Navigate',
+        icon: <Layers size={16} />,
+        run: () => router.push('/#work'),
+      },
+      {
+        id: 'skills',
+        label: 'How I build',
+        group: 'Navigate',
+        icon: <Layers size={16} />,
+        run: () => router.push('/#skills'),
+      },
+      {
+        id: 'projects',
+        label: 'All projects',
+        group: 'Navigate',
+        icon: <FolderGit2 size={16} />,
+        run: () => router.push('/projects'),
+      },
+      {
+        id: 'contact',
+        label: 'Contact',
+        group: 'Navigate',
+        icon: <Mail size={16} />,
+        run: () => router.push('/#contact'),
+      },
+
+      ...featuredProjects.map((project) => ({
+        id: `case-${project.slug}`,
+        label: project.name,
+        hint: project.year,
+        group: 'Case studies',
+        icon: <FolderGit2 size={16} />,
+        run: () => router.push(`/projects/${project.slug}`),
+      })),
+
+      {
+        id: 'copy-email',
+        label: 'Copy email address',
+        hint: profile.email,
+        group: 'Actions',
+        icon: copied ? <Check size={16} className="text-ok" /> : <Copy size={16} />,
         run: () => {
-          navigator.clipboard.writeText(data.email);
+          navigator.clipboard.writeText(profile.email);
           setCopied(true);
           setTimeout(() => setCopied(false), 1500);
         },
       },
       {
-        id: 'terminal', label: 'Open Terminal', hint: 'Press ` anywhere', group: 'ACTIONS',
-        icon: <TerminalSquare size={16} />,
-        run: () => { close(); window.dispatchEvent(new CustomEvent('vw:toggle-terminal')); },
+        id: 'cv',
+        label: 'Open CV',
+        hint: 'PDF',
+        group: 'Actions',
+        icon: <FileText size={16} />,
+        run: () => window.open(profile.links.resume, '_blank'),
       },
       {
-        id: 'overdrive', label: 'Activate Overdrive', hint: 'Or try the Konami code…', group: 'ACTIONS',
-        icon: <Zap size={16} />,
-        run: () => { close(); window.dispatchEvent(new CustomEvent('vw:overdrive')); },
+        id: 'theme',
+        label: 'Switch theme',
+        hint: 'dark / light',
+        group: 'Actions',
+        icon: <SunMoon size={16} />,
+        run: () => applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light'),
       },
-    ];
+      {
+        id: 'stats',
+        label: 'Show render stats',
+        hint: 'FPS and heap, desktop only',
+        group: 'Actions',
+        icon: <Activity size={16} />,
+        run: () => {
+          close();
+          window.dispatchEvent(new CustomEvent('vw:toggle-stats'));
+        },
+      },
+      {
+        id: 'terminal',
+        label: 'Open terminal',
+        hint: 'or press `',
+        group: 'Actions',
+        icon: <TerminalSquare size={16} />,
+        run: () => {
+          close();
+          window.dispatchEvent(new CustomEvent('vw:toggle-terminal'));
+        },
+      },
 
-    if (data.github) cmds.push({ id: 'github', label: 'Open GitHub', hint: 'Source code', group: 'LINKS', icon: <Github size={16} />, run: () => window.open(data.github!, '_blank') });
-    if (data.linkedin) cmds.push({ id: 'linkedin', label: 'Open LinkedIn', hint: 'Professional profile', group: 'LINKS', icon: <Linkedin size={16} />, run: () => window.open(data.linkedin!, '_blank') });
-    if (data.whatsapp) cmds.push({ id: 'whatsapp', label: 'Chat on WhatsApp', hint: 'Direct message', group: 'LINKS', icon: <MessageCircle size={16} />, run: () => window.open(`https://wa.me/${data.whatsapp}`, '_blank') });
-    if (data.resumeUrl) cmds.push({ id: 'resume', label: 'View Resume', hint: 'PDF document', group: 'LINKS', icon: <FileText size={16} />, run: () => window.open(data.resumeUrl!, '_blank') });
-
-    return cmds;
-  }, [router, data, copied, close]);
+      {
+        id: 'github',
+        label: 'GitHub',
+        hint: 'github.com/VicoAritonang',
+        group: 'Elsewhere',
+        icon: <Github size={16} />,
+        run: () => window.open(profile.links.github, '_blank'),
+      },
+      {
+        id: 'linkedin',
+        label: 'LinkedIn',
+        group: 'Elsewhere',
+        icon: <Linkedin size={16} />,
+        run: () => window.open(profile.links.linkedin, '_blank'),
+      },
+    ],
+    [router, copied, close],
+  );
 
   const filtered = useMemo(() => {
     if (!query.trim()) return commands;
     const q = query.toLowerCase();
-    return commands.filter(c => c.label.toLowerCase().includes(q) || c.hint?.toLowerCase().includes(q) || c.group.toLowerCase().includes(q));
+    return commands.filter(
+      (c) =>
+        c.label.toLowerCase().includes(q) ||
+        c.hint?.toLowerCase().includes(q) ||
+        c.group.toLowerCase().includes(q),
+    );
   }, [commands, query]);
 
   const groups = useMemo(() => {
     const map = new Map<string, Command[]>();
-    filtered.forEach(c => {
+    filtered.forEach((c) => {
       if (!map.has(c.group)) map.set(c.group, []);
       map.get(c.group)!.push(c);
     });
     return Array.from(map.entries());
   }, [filtered]);
 
-  // Global hotkey
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        setOpen(o => !o);
+        setOpen((o) => !o);
       }
       if (e.key === 'Escape') close();
     };
@@ -107,6 +210,10 @@ export function CommandPalette({ data }: { data: ShellData }) {
 
   useEffect(() => setSelected(0), [query]);
 
+  useEffect(() => {
+    listRef.current?.querySelector('[data-selected="true"]')?.scrollIntoView({ block: 'nearest' });
+  }, [selected]);
+
   const execute = (cmd: Command) => {
     cmd.run();
     if (cmd.id !== 'copy-email') close();
@@ -115,19 +222,14 @@ export function CommandPalette({ data }: { data: ShellData }) {
   const onInputKey = (e: React.KeyboardEvent) => {
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelected(s => Math.min(s + 1, filtered.length - 1));
+      setSelected((s) => Math.min(s + 1, filtered.length - 1));
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setSelected(s => Math.max(s - 1, 0));
+      setSelected((s) => Math.max(s - 1, 0));
     } else if (e.key === 'Enter' && filtered[selected]) {
       execute(filtered[selected]);
     }
   };
-
-  // Keep the selected row in view
-  useEffect(() => {
-    listRef.current?.querySelector('[data-selected="true"]')?.scrollIntoView({ block: 'nearest' });
-  }, [selected]);
 
   let flatIndex = -1;
 
@@ -139,7 +241,7 @@ export function CommandPalette({ data }: { data: ShellData }) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.15 }}
-          className="fixed inset-0 z-[90] flex items-start justify-center pt-[15vh] px-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-[90] flex items-start justify-center bg-surface px-4 pt-[15vh] backdrop-blur-sm"
           onClick={close}
           role="dialog"
           aria-label="Command palette"
@@ -149,33 +251,33 @@ export function CommandPalette({ data }: { data: ShellData }) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -12 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="w-full max-w-xl rounded-2xl border border-cyan-500/20 bg-[#07070d]/95 backdrop-blur-2xl shadow-[0_0_60px_rgba(6,182,212,0.15)] overflow-hidden"
+            className="w-full max-w-xl overflow-hidden rounded-2xl border border-line bg-panel/95 shadow-[var(--shadow-panel)] backdrop-blur-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Input */}
-            <div className="flex items-center gap-3 px-4 sm:px-5 border-b border-white/5">
-              <Search size={18} className="text-cyan-500 shrink-0" />
+            <div className="flex items-center gap-3 border-b border-line px-4 sm:px-5">
+              <Search size={18} className="shrink-0 text-faint" aria-hidden="true" />
               <input
                 ref={inputRef}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={onInputKey}
-                placeholder="Type a command or search..."
-                className="w-full bg-transparent py-4 text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none font-mono"
+                placeholder="Search or jump to…"
+                className="w-full bg-transparent py-4 text-sm text-fg placeholder-faint focus:outline-none sm:text-base"
               />
-              <kbd className="hidden sm:block px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-[10px] font-mono text-gray-500 shrink-0">ESC</kbd>
+              <kbd className="hidden shrink-0 rounded border border-line bg-tint px-1.5 py-0.5 font-mono text-[10px] text-faint sm:block">
+                ESC
+              </kbd>
             </div>
 
-            {/* Results */}
             <div ref={listRef} className="max-h-[50vh] overflow-y-auto py-2">
               {groups.length === 0 && (
-                <div className="px-5 py-8 text-center font-mono text-sm text-gray-500">
-                  NO_MATCH: '{query}'
+                <div className="px-5 py-8 text-center text-sm text-faint">
+                  Nothing matches &ldquo;{query}&rdquo;
                 </div>
               )}
               {groups.map(([group, cmds]) => (
                 <div key={group}>
-                  <div className="px-5 pt-3 pb-1 font-mono text-[10px] tracking-[0.25em] text-gray-600">{group}</div>
+                  <div className="kicker px-5 pt-3 pb-1">{group}</div>
                   {cmds.map((cmd) => {
                     flatIndex++;
                     const isSelected = filtered[selected]?.id === cmd.id;
@@ -186,14 +288,22 @@ export function CommandPalette({ data }: { data: ShellData }) {
                         data-selected={isSelected}
                         onMouseEnter={() => setSelected(idx)}
                         onClick={() => execute(cmd)}
-                        className={`w-full flex items-center gap-3 px-5 py-2.5 text-left transition-colors ${
-                          isSelected ? 'bg-cyan-500/10 text-white' : 'text-gray-400'
+                        className={`flex w-full items-center gap-3 px-5 py-2.5 text-left transition-colors ${
+                          isSelected ? 'bg-tint text-fg' : 'text-muted'
                         }`}
                       >
-                        <span className={`shrink-0 ${isSelected ? 'text-cyan-400' : 'text-gray-500'}`}>{cmd.icon}</span>
-                        <span className="text-sm flex-1 truncate">{cmd.label}</span>
-                        {cmd.hint && <span className="text-[11px] font-mono text-gray-600 truncate max-w-[40%]">{cmd.hint}</span>}
-                        {isSelected && <CornerDownLeft size={13} className="text-cyan-500/70 shrink-0" />}
+                        <span className={`shrink-0 ${isSelected ? 'text-accent' : 'text-faint'}`}>
+                          {cmd.icon}
+                        </span>
+                        <span className="flex-1 truncate text-sm">{cmd.label}</span>
+                        {cmd.hint && (
+                          <span className="max-w-[40%] truncate font-mono text-[11px] text-faint">
+                            {cmd.hint}
+                          </span>
+                        )}
+                        {isSelected && (
+                          <CornerDownLeft size={13} className="shrink-0 text-accent" aria-hidden="true" />
+                        )}
                       </button>
                     );
                   })}
@@ -201,11 +311,13 @@ export function CommandPalette({ data }: { data: ShellData }) {
               ))}
             </div>
 
-            {/* Footer */}
-            <div className="flex items-center gap-4 px-5 py-2.5 border-t border-white/5 font-mono text-[10px] text-gray-600">
-              <span className="flex items-center gap-1.5"><kbd className="px-1 py-0.5 rounded border border-white/10 bg-white/5">↑↓</kbd> navigate</span>
-              <span className="flex items-center gap-1.5"><kbd className="px-1 py-0.5 rounded border border-white/10 bg-white/5">↵</kbd> execute</span>
-              <span className="ml-auto text-cyan-500/50">VICO.WORKS OS v5.0</span>
+            <div className="flex items-center gap-4 border-t border-line px-5 py-2.5 font-mono text-[10px] text-faint">
+              <span className="flex items-center gap-1.5">
+                <kbd className="rounded border border-line bg-tint px-1 py-0.5">↑↓</kbd> navigate
+              </span>
+              <span className="flex items-center gap-1.5">
+                <kbd className="rounded border border-line bg-tint px-1 py-0.5">↵</kbd> select
+              </span>
             </div>
           </motion.div>
         </motion.div>

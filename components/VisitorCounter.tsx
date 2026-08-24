@@ -1,14 +1,32 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { incrementVisitorCount } from '@/app/actions';
 
-export function VisitorCounter() {
+/* The visitor count survives, but as a footnote rather than as one of three
+   headline figures. It is a fact about the website; the numbers at the top of
+   the page should be facts about the work.
+
+   Runs after hydration, so the page it sits on stays statically rendered. */
+
+export function VisitorCounter({ className = '' }: { className?: string }) {
+  const [count, setCount] = useState<number | null>(null);
+
   useEffect(() => {
-    // Call the server action to increment count on mount
-    incrementVisitorCount();
+    let active = true;
+    incrementVisitorCount().then((value) => {
+      if (active && value !== null) setCount(value);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
-  return null;
-}
+  if (count === null) return null;
 
+  return (
+    <span className={`font-mono tabular-nums ${className}`}>
+      {count.toLocaleString('en-US')} visits
+    </span>
+  );
+}

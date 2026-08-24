@@ -27,7 +27,7 @@ export function Overdrive() {
           angle: Math.random() * Math.PI * 2,
           distance: 150 + Math.random() * 500,
           size: 2 + Math.random() * 5,
-          color: Math.random() > 0.5 ? '#22d3ee' : '#c084fc',
+          color: 'var(--accent)',
           delay: Math.random() * 0.3,
         }))
       );
@@ -70,7 +70,7 @@ export function Overdrive() {
         >
           {/* Chromatic flash */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 via-transparent to-purple-500/20"
+            className="absolute inset-0 bg-accent/10"
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 1, 0.3, 0.8, 0] }}
             transition={{ duration: 0.6, times: [0, 0.1, 0.3, 0.5, 1] }}
@@ -80,7 +80,7 @@ export function Overdrive() {
           {[0, 0.15, 0.3].map((delay, i) => (
             <motion.div
               key={i}
-              className="absolute left-1/2 top-1/2 rounded-full border-2 border-cyan-400/60"
+              className="absolute left-1/2 top-1/2 rounded-full border-2 border-line"
               style={{ translateX: '-50%', translateY: '-50%' }}
               initial={{ width: 0, height: 0, opacity: 1 }}
               animate={{ width: '150vmax', height: '150vmax', opacity: 0 }}
@@ -112,7 +112,7 @@ export function Overdrive() {
               animate={{ scale: [0.5, 1.15, 1], opacity: [0, 1, 1] }}
               exit={{ scale: 1.3, opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="font-mono font-bold text-4xl sm:text-6xl tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-white to-purple-300 drop-shadow-[0_0_30px_rgba(6,182,212,0.8)]"
+              className="font-mono font-bold text-4xl sm:text-6xl tracking-[0.2em] text-accent"
             >
               OVERDRIVE
             </motion.div>
@@ -120,7 +120,7 @@ export function Overdrive() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              className="font-mono text-xs sm:text-sm tracking-[0.4em] text-cyan-400"
+              className="font-mono text-xs sm:text-sm tracking-[0.4em] text-accent"
             >
               MAXIMUM POWER UNLOCKED
             </motion.div>
@@ -128,7 +128,7 @@ export function Overdrive() {
 
           {/* Scanline sweep */}
           <motion.div
-            className="absolute inset-x-0 h-24 bg-gradient-to-b from-transparent via-cyan-400/30 to-transparent"
+            className="absolute inset-x-0 h-24 bg-accent/25"
             initial={{ top: '-20%' }}
             animate={{ top: '120%' }}
             transition={{ duration: 0.8, repeat: 2, ease: 'linear' }}

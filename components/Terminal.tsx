@@ -1,10 +1,21 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { X, Minus, TerminalSquare } from 'lucide-react';
-import type { ShellData } from './Shell';
+import { Minus, TerminalSquare, X } from 'lucide-react';
+import { profile } from '@/content/profile';
+import { allProjects, getProject } from '@/content/projects';
+import { skillLayers } from '@/content/skills';
+import { applyTheme } from './theme';
+
+/* Kept as an easter egg, not as a feature. Nothing on the page points at it —
+   it answers to the backtick key and to the command palette, and that is the
+   whole invitation.
+
+   The copy was trimmed of the lines that undercut the work: a shell that
+   opens with "unauthorized access is a compliment" and prints a full bar for
+   every skill is doing the same thing the old skills grid did. */
 
 interface Line {
   type: 'input' | 'output' | 'system' | 'success' | 'error';
@@ -18,33 +29,39 @@ const BANNER = String.raw`
    \_/  |___|\___|\___/  .WORKS
 `;
 
-export function Terminal({ data }: { data: ShellData }) {
+export function Terminal() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [lines, setLines] = useState<Line[]>([]);
+  // The banner is static, so it is the initial state rather than something an
+  // effect prints on first open — no effect, no `booted` ref, no extra render.
+  const [lines, setLines] = useState<Line[]>(() => [
+    { type: 'system', text: BANNER },
+    { type: 'system', text: `${profile.name} — ${profile.role}` },
+    { type: 'system', text: "Type 'help' for the list of commands." },
+    { type: 'output', text: '' },
+  ]);
   const [input, setInput] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const booted = useRef(false);
 
   const print = useCallback((newLines: Line[]) => {
-    setLines(prev => [...prev, ...newLines]);
+    setLines((prev) => [...prev, ...newLines]);
   }, []);
 
-  // Toggle listeners: ` key + custom event
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
-      const typing = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      const typing =
+        target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
       if (e.key === '`' && !typing) {
         e.preventDefault();
-        setOpen(o => !o);
+        setOpen((o) => !o);
       }
       if (e.key === 'Escape') setOpen(false);
     };
-    const onToggle = () => setOpen(o => !o);
+    const onToggle = () => setOpen((o) => !o);
     window.addEventListener('keydown', onKey);
     window.addEventListener('vw:toggle-terminal', onToggle);
     return () => {
@@ -53,21 +70,12 @@ export function Terminal({ data }: { data: ShellData }) {
     };
   }, []);
 
-  // Boot banner on first open
   useEffect(() => {
-    if (open && !booted.current) {
-      booted.current = true;
-      print([
-        { type: 'system', text: BANNER },
-        { type: 'system', text: 'vicoworks-shell v5.0.0 — unauthorized access is a compliment.' },
-        { type: 'system', text: "Type 'help' to list available commands." },
-        { type: 'output', text: '' },
-      ]);
-    }
-    if (open) setTimeout(() => inputRef.current?.focus(), 80);
-  }, [open, print]);
+    if (!open) return;
+    const id = setTimeout(() => inputRef.current?.focus(), 80);
+    return () => clearTimeout(id);
+  }, [open]);
 
-  // Auto-scroll
   useEffect(() => {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight;
   }, [lines]);
@@ -76,7 +84,7 @@ export function Terminal({ data }: { data: ShellData }) {
     const cmd = raw.trim();
     if (!cmd) return;
 
-    setHistory(prev => [cmd, ...prev]);
+    setHistory((prev) => [cmd, ...prev]);
     setHistoryIndex(-1);
     print([{ type: 'input', text: cmd }]);
 
@@ -85,103 +93,145 @@ export function Terminal({ data }: { data: ShellData }) {
     switch (name) {
       case 'help':
         print([
-          { type: 'output', text: 'AVAILABLE COMMANDS:' },
-          { type: 'output', text: '  whoami          who is this guy?' },
-          { type: 'output', text: '  skills          list technical arsenal' },
-          { type: 'output', text: '  projects        open project archives' },
-          { type: 'output', text: '  contact         ways to reach me' },
-          { type: 'output', text: '  github          open GitHub profile' },
-          { type: 'output', text: '  linkedin        open LinkedIn profile' },
-          { type: 'output', text: '  resume          open my resume' },
-          { type: 'output', text: '  overdrive       ⚡ do not press' },
+          { type: 'output', text: 'COMMANDS' },
+          { type: 'output', text: '  whoami          the short version' },
+          { type: 'output', text: '  work            list every project' },
+          { type: 'output', text: '  open <name>     open a case study' },
+          { type: 'output', text: '  skills          what I work with, by layer' },
+          { type: 'output', text: '  contact         how to reach me' },
+          { type: 'output', text: '  github          open GitHub' },
+          { type: 'output', text: '  linkedin        open LinkedIn' },
+          { type: 'output', text: '  cv              open my CV' },
+          { type: 'output', text: '  stats           toggle the render stats panel' },
+          { type: 'output', text: '  theme           switch dark / light' },
           { type: 'output', text: '  sudo hire-me    the only command that matters' },
-          { type: 'output', text: '  banner          reprint the banner' },
           { type: 'output', text: '  clear           clear the screen' },
-          { type: 'output', text: '  exit            close terminal' },
+          { type: 'output', text: '  exit            close the terminal' },
         ]);
         break;
 
       case 'whoami':
         print([
-          { type: 'success', text: 'vico@aritonang:~$ identity confirmed' },
-          { type: 'output', text: data.overview || 'AI Engineer & Software Developer based in Indonesia.' },
-          { type: 'output', text: 'Status: OPEN TO OPPORTUNITIES' },
+          { type: 'success', text: profile.claim },
+          { type: 'output', text: profile.identity },
+          { type: 'output', text: profile.availability },
         ]);
         break;
 
-      case 'skills':
-      case 'stack':
-        if (data.skills.length) {
-          print([
-            { type: 'success', text: `LOADED ${data.skills.length} MODULES:` },
-            ...data.skills.map((s, i) => ({
-              type: 'output' as const,
-              text: `  [${String(i + 1).padStart(2, '0')}] ${s} ${'▰'.repeat(8)}▱▱ ONLINE`,
-            })),
-          ]);
-        } else {
-          print([{ type: 'error', text: 'skill database unreachable.' }]);
-        }
+      case 'work':
+      case 'projects':
+        print([
+          { type: 'success', text: `${allProjects.length} projects` },
+          ...allProjects.map((p) => ({
+            type: 'output' as const,
+            text: `  ${p.slug.padEnd(20)} ${p.year.padEnd(16)} ${p.status}`,
+          })),
+          { type: 'output', text: "  open <name> to read one." },
+        ]);
         break;
 
-      case 'projects':
-        print([{ type: 'success', text: 'Opening /projects ...' }]);
-        setTimeout(() => router.push('/projects'), 400);
+      case 'open': {
+        const slug = args[0];
+        const project = slug ? getProject(slug) : undefined;
+        if (!project) {
+          print([{ type: 'error', text: `open: no project called '${slug ?? ''}'. Try 'work'.` }]);
+          break;
+        }
+        if (!project.caseStudy) {
+          if (project.links.live) {
+            print([{ type: 'success', text: `Opening ${project.links.live} ...` }]);
+            window.open(project.links.live, '_blank');
+          } else {
+            print([{ type: 'error', text: `open: ${project.slug} has no write-up yet.` }]);
+          }
+          break;
+        }
+        print([{ type: 'success', text: `Opening /projects/${project.slug} ...` }]);
+        setTimeout(() => router.push(`/projects/${project.slug}`), 400);
+        break;
+      }
+
+      case 'skills':
+      case 'stack':
+        print([
+          { type: 'success', text: 'By layer:' },
+          ...skillLayers.flatMap((layer) => [
+            { type: 'output' as const, text: `  ${layer.name}` },
+            { type: 'output' as const, text: `    ${layer.items.join(', ')}` },
+          ]),
+        ]);
         break;
 
       case 'contact':
         print([
-          { type: 'success', text: 'CONTACT CHANNELS:' },
-          { type: 'output', text: `  email     ${data.email}` },
-          ...(data.github ? [{ type: 'output' as const, text: `  github    ${data.github}` }] : []),
-          ...(data.linkedin ? [{ type: 'output' as const, text: `  linkedin  ${data.linkedin}` }] : []),
-          ...(data.whatsapp ? [{ type: 'output' as const, text: `  whatsapp  wa.me/${data.whatsapp}` }] : []),
+          { type: 'success', text: 'Reach me at:' },
+          { type: 'output', text: `  email     ${profile.email}` },
+          { type: 'output', text: `  github    ${profile.links.github}` },
+          { type: 'output', text: `  linkedin  ${profile.links.linkedin}` },
+          { type: 'output', text: `  whatsapp  ${profile.links.whatsapp}` },
         ]);
         break;
 
       case 'github':
-        if (data.github) {
-          print([{ type: 'success', text: 'Opening GitHub ...' }]);
-          window.open(data.github, '_blank');
-        } else print([{ type: 'error', text: 'github: remote not configured.' }]);
+        print([{ type: 'success', text: 'Opening GitHub ...' }]);
+        window.open(profile.links.github, '_blank');
         break;
 
       case 'linkedin':
-        if (data.linkedin) {
-          print([{ type: 'success', text: 'Opening LinkedIn ...' }]);
-          window.open(data.linkedin, '_blank');
-        } else print([{ type: 'error', text: 'linkedin: remote not configured.' }]);
+        print([{ type: 'success', text: 'Opening LinkedIn ...' }]);
+        window.open(profile.links.linkedin, '_blank');
         break;
 
-      case 'resume':
       case 'cv':
-        if (data.resumeUrl) {
-          print([{ type: 'success', text: 'Fetching resume.pdf ...' }]);
-          window.open(data.resumeUrl, '_blank');
-        } else print([{ type: 'error', text: 'resume: file not found.' }]);
+      case 'resume':
+        print([{ type: 'success', text: 'Opening CV ...' }]);
+        window.open(profile.links.resume, '_blank');
+        break;
+
+      case 'stats':
+        window.dispatchEvent(new CustomEvent('vw:toggle-stats'));
+        print([{ type: 'success', text: 'Render stats toggled (desktop only).' }]);
         break;
 
       case 'sudo':
         if (args.join(' ') === 'hire-me' || args.join(' ') === 'hire me') {
           print([
             { type: 'success', text: '[sudo] password for recruiter: ********' },
-            { type: 'success', text: 'ACCESS GRANTED. Excellent decision.' },
-            { type: 'output', text: 'Composing offer letter ... just kidding. Opening email client.' },
+            { type: 'success', text: 'Access granted. Excellent decision.' },
+            { type: 'output', text: 'Opening your email client.' },
           ]);
-          setTimeout(() => window.open(`mailto:${data.email}?subject=Let's%20work%20together`, '_blank'), 800);
+          setTimeout(
+            () => window.open(`mailto:${profile.email}?subject=Let's%20work%20together`, '_blank'),
+            800,
+          );
         } else {
-          print([{ type: 'error', text: `sudo: ${args.join(' ') || '?'}: permission denied. Try 'sudo hire-me'.` }]);
+          print([
+            {
+              type: 'error',
+              text: `sudo: ${args.join(' ') || '?'}: permission denied. Try 'sudo hire-me'.`,
+            },
+          ]);
         }
         break;
 
       case 'overdrive':
-      case 'matrix':
-        print([{ type: 'success', text: '⚡ OVERDRIVE ENGAGED. BRACE YOURSELF.' }]);
+        print([{ type: 'success', text: 'Overdrive engaged.' }]);
         window.dispatchEvent(new CustomEvent('vw:overdrive'));
         break;
 
+      case 'theme': {
+        const next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+        applyTheme(next);
+        print([{ type: 'success', text: `theme set to ${next}` }]);
+        break;
+      }
+
       case 'banner':
         print([{ type: 'system', text: BANNER }]);
+        break;
+
+      case 'ls':
+        print([{ type: 'output', text: 'work/  skills/  research/  about/  contact/' }]);
         break;
 
       case 'date':
@@ -200,14 +250,6 @@ export function Terminal({ data }: { data: ShellData }) {
       case 'exit':
       case 'quit':
         setOpen(false);
-        break;
-
-      case 'ls':
-        print([{ type: 'output', text: 'home/  projects/  skills/  contact/  secrets/   <- nice try, it\'s empty' }]);
-        break;
-
-      case 'rm':
-        print([{ type: 'error', text: 'rm: this portfolio is write-protected by pure willpower.' }]);
         break;
 
       default:
@@ -236,11 +278,16 @@ export function Terminal({ data }: { data: ShellData }) {
 
   const lineColor = (type: Line['type']) => {
     switch (type) {
-      case 'input': return 'text-white';
-      case 'system': return 'text-cyan-400';
-      case 'success': return 'text-emerald-400';
-      case 'error': return 'text-red-400';
-      default: return 'text-gray-400';
+      case 'input':
+        return 'text-fg';
+      case 'system':
+        return 'text-accent';
+      case 'success':
+        return 'text-ok';
+      case 'error':
+        return 'text-err';
+      default:
+        return 'text-muted';
     }
   };
 
@@ -252,47 +299,52 @@ export function Terminal({ data }: { data: ShellData }) {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 40, scale: 0.98 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="fixed bottom-0 sm:bottom-6 inset-x-0 sm:inset-x-auto sm:right-6 z-[85] w-full sm:w-[600px] sm:max-w-[calc(100vw-3rem)]"
+          className="fixed inset-x-0 bottom-0 z-[85] w-full sm:inset-x-auto sm:right-6 sm:bottom-6 sm:w-[600px] sm:max-w-[calc(100vw-3rem)]"
           role="dialog"
           aria-label="Interactive terminal"
         >
-          <div className="rounded-t-2xl sm:rounded-2xl border border-cyan-500/20 bg-[#050508]/95 backdrop-blur-2xl shadow-[0_0_60px_rgba(6,182,212,0.2)] overflow-hidden">
-            {/* Title bar */}
-            <div className="flex items-center gap-2 px-4 py-2.5 bg-white/[0.03] border-b border-white/5">
-              <TerminalSquare size={14} className="text-cyan-500" />
-              <span className="font-mono text-xs text-gray-400 tracking-wider">vico@works: ~/portfolio</span>
+          <div className="overflow-hidden rounded-t-2xl border border-line bg-panel/95 shadow-[var(--shadow-panel)] backdrop-blur-2xl sm:rounded-2xl">
+            <div className="flex items-center gap-2 border-b border-line bg-tint px-4 py-2.5">
+              <TerminalSquare size={14} className="text-accent" aria-hidden="true" />
+              <span className="font-mono text-xs tracking-wider text-muted">vico@works: ~</span>
               <div className="ml-auto flex items-center gap-2">
-                <button onClick={() => setLines([])} className="p-1 text-gray-500 hover:text-white transition-colors" aria-label="Clear terminal">
+                <button
+                  onClick={() => setLines([])}
+                  className="p-1 text-faint transition-colors hover:text-fg"
+                  aria-label="Clear terminal"
+                >
                   <Minus size={14} />
                 </button>
-                <button onClick={() => setOpen(false)} className="p-1 text-gray-500 hover:text-red-400 transition-colors" aria-label="Close terminal">
+                <button
+                  onClick={() => setOpen(false)}
+                  className="p-1 text-faint transition-colors hover:text-err"
+                  aria-label="Close terminal"
+                >
                   <X size={14} />
                 </button>
               </div>
             </div>
 
-            {/* Body */}
             <div
               ref={bodyRef}
-              className="h-[320px] sm:h-[360px] overflow-y-auto p-4 font-mono text-[11px] sm:text-xs leading-relaxed cursor-text"
+              className="h-[320px] cursor-text overflow-y-auto p-4 font-mono text-[11px] leading-relaxed sm:h-[360px] sm:text-xs"
               onClick={() => inputRef.current?.focus()}
             >
               {lines.map((line, i) => (
                 <div key={i} className={lineColor(line.type)}>
-                  {line.type === 'input' && <span className="text-cyan-500">❯ </span>}
+                  {line.type === 'input' && <span className="text-accent">❯ </span>}
                   <span className="whitespace-pre-wrap">{line.text}</span>
                 </div>
               ))}
 
-              {/* Prompt */}
-              <div className="flex items-center text-white">
-                <span className="text-cyan-500 mr-2">❯</span>
+              <div className="flex items-center text-fg">
+                <span className="mr-2 text-accent">❯</span>
                 <input
                   ref={inputRef}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={onKeyDown}
-                  className="flex-1 bg-transparent focus:outline-none caret-cyan-400"
+                  className="flex-1 bg-transparent caret-accent focus:outline-none"
                   spellCheck={false}
                   autoComplete="off"
                   aria-label="Terminal input"

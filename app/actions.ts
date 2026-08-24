@@ -1,86 +1,84 @@
 'use server';
 
-import { supabaseAdmin, supabase } from '@/lib/supabase';
-import { revalidatePath } from 'next/cache';
-import { SupabaseClient } from '@supabase/supabase-js';
-import { Database } from '@/types/database';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-// Helper to get a typed client
-function getClient(): SupabaseClient<Database> {
-  return (supabaseAdmin || supabase) as SupabaseClient<Database>;
+/* =========================================================================
+   COUNTERS
+   -------------------------------------------------------------------------
+   The only thing Supabase still does. Page content comes from `content/`, so
+   nothing here can stop a page from rendering: every function swallows its
+   errors and returns null, and every caller treats null as "no number today".
+
+   Deliberately no revalidatePath() — the pages are static now, and busting
+   that cache on every page view was what made the site slow.
+
+   Likes are keyed by the project slug rather than a database id, because the
+   slug is the identifier that exists in the repo. That needs a table:
+
+     create table if not exists project_likes (
+       slug  text primary key,
+       count integer not null default 0
+     );
+     alter table project_likes enable row level security;
+     create policy "read"   on project_likes for select using (true);
+     create policy "update" on project_likes for update using (true);
+     create policy "insert" on project_likes for insert with check (true);
+
+   Until it exists, the button degrades to a local-only count.
+   ========================================================================= */
+
+function client(): SupabaseClient {
+  return (supabaseAdmin || supabase) as SupabaseClient;
 }
 
-export async function incrementVisitorCount() {
+export async function incrementVisitorCount(): Promise<number | null> {
   try {
-    const client = getClient();
-    
-    // 1. Fetch current count
-    const result: any = await client
-      .from('statistics')
-      .select('id, visitor_count')
-      .single();
+    const db = client();
 
-    if (result.error || !result.data) {
-      console.error('Error fetching stats for increment:', result.error);
-      return;
-    }
+    const read = await db.from('statistics').select('id, visitor_count').single();
+    if (read.error || !read.data) return null;
 
-    const currentStats = result.data as { id: string; visitor_count: number | null };
+    const row = read.data as { id: string; visitor_count: number | null };
+    const next = (row.visitor_count ?? 0) + 1;
 
-    // 2. Increment
-    const visitorCount = currentStats.visitor_count ?? 0;
-    const newCount = visitorCount + 1;
-    
-    // Use type assertion to bypass TypeScript's strict checking for update
-    const updateResult: any = await (client as any)
-      .from('statistics')
-      .update({ visitor_count: newCount })
-      .eq('id', currentStats.id);
+    const write = await db.from('statistics').update({ visitor_count: next }).eq('id', row.id);
+    if (write.error) return null;
 
-    if (updateResult.error) {
-      console.error('Error updating visitor count:', updateResult.error);
-    } else {
-      revalidatePath('/');
-    }
-  } catch (error) {
-    console.error('Unexpected error incrementing visitor count:', error);
+    return next;
+  } catch {
+    return null;
   }
 }
 
-export async function incrementProjectLike(projectId: string) {
+export async function getProjectLikes(slug: string): Promise<number | null> {
   try {
-    const client = getClient();
+    const read = await client().from('project_likes').select('count').eq('slug', slug).maybeSingle();
+    if (read.error) return null;
+    return ((read.data as { count: number | null } | null)?.count ?? 0) as number;
+  } catch {
+    return null;
+  }
+}
 
-    const result: any = await client
-      .from('projects')
-      .select('like_count')
-      .eq('id', projectId)
-      .single();
+export async function likeProject(slug: string): Promise<number | null> {
+  try {
+    const db = client();
 
-    if (result.error || !result.data) {
-      console.error('Error fetching project for like:', result.error);
-      return null;
-    }
+    const read = await db.from('project_likes').select('count').eq('slug', slug).maybeSingle();
+    if (read.error) return null;
 
-    const project = result.data as { like_count: number | null };
-    const likeCount = project.like_count ?? 0;
-    const newCount = likeCount + 1;
+    const current = (read.data as { count: number | null } | null)?.count ?? null;
+    const next = (current ?? 0) + 1;
 
-    // Use type assertion to bypass TypeScript's strict checking for update
-    const updateResult: any = await (client as any)
-      .from('projects')
-      .update({ like_count: newCount })
-      .eq('id', projectId);
+    const write =
+      current === null
+        ? await db.from('project_likes').insert({ slug, count: next })
+        : await db.from('project_likes').update({ count: next }).eq('slug', slug);
 
-    if (updateResult.error) {
-      console.error('Error updating like count:', updateResult.error);
-      return null;
-    }
-
-    revalidatePath('/projects');
-    return newCount;
-  } catch (error) {
-    console.error('Unexpected error incrementing like count:', error);
+    if (write.error) return null;
+    return next;
+  } catch {
     return null;
   }
 }
