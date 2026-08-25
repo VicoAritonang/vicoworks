@@ -56,21 +56,18 @@ export function ProjectsList({ projects }: ProjectsListProps) {
     <div className="space-y-8 sm:space-y-12">
       {/* Search & Filter Controls */}
       <div className="sticky top-16 sm:top-20 md:top-24 z-30 w-full max-w-4xl mx-auto px-4 sm:px-0">
-        <div className="relative p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl space-y-3 sm:space-y-4 overflow-hidden">
-          {/* Ambient glow inside the panel */}
-          <div className="absolute -top-10 -left-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
-          <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" aria-hidden="true" />
+        <div className="relative p-3 sm:p-4 rounded-[12px] bg-background/95 backdrop-blur-md border border-hairline space-y-3 sm:space-y-4 overflow-hidden">
 
           {/* Search Input */}
           <div className="relative">
-            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-muted" size={18} />
             <input
               ref={searchRef}
               type="text"
               placeholder="Search projects by name...  [ / ]"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-white/5 border border-white/10 rounded-lg sm:rounded-xl py-2.5 sm:py-3 pl-10 sm:pl-12 pr-10 text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 focus:shadow-[0_0_20px_rgba(6,182,212,0.15)] transition-all"
+              className="w-full bg-white/[0.03] border border-hairline rounded-[8px] py-2.5 sm:py-3 pl-10 sm:pl-12 pr-10 text-sm sm:text-base text-foreground placeholder-muted-2 focus:outline-none focus:border-accent transition-colors"
             />
             <AnimatePresence>
               {searchQuery && (
@@ -79,7 +76,7 @@ export function ProjectsList({ projects }: ProjectsListProps) {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-2 hover:text-foreground transition-colors"
                   aria-label="Clear search"
                 >
                   <X size={16} />
@@ -90,21 +87,21 @@ export function ProjectsList({ projects }: ProjectsListProps) {
 
           {/* Category Filter */}
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
-            <Filter size={14} className="text-cyan-500 shrink-0 mr-1 sm:mr-2" />
+            <Filter size={14} className="text-accent shrink-0 mr-1 sm:mr-2" />
             {allCategories.map(category => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`relative px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
+                className={`relative px-3 sm:px-4 py-1.5 rounded-[8px] font-mono text-[11px] sm:text-xs tracking-[0.08em] whitespace-nowrap transition-colors ${
                   selectedCategory === category
-                    ? 'text-white'
-                    : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white active:scale-95'
+                    ? 'text-accent-ink'
+                    : 'border border-hairline text-muted hover:text-foreground hover:border-white/40'
                 }`}
               >
                 {selectedCategory === category && (
                   <motion.span
                     layoutId="category-pill"
-                    className="absolute inset-0 rounded-full bg-cyan-500 shadow-[0_0_15px_rgba(6,182,212,0.5)]"
+                    className="absolute inset-0 rounded-[8px] bg-accent"
                     transition={{ type: 'spring', stiffness: 400, damping: 32 }}
                   />
                 )}
@@ -114,8 +111,8 @@ export function ProjectsList({ projects }: ProjectsListProps) {
           </div>
 
           {/* Result count */}
-          <div className="font-mono text-[10px] sm:text-xs text-gray-500 tracking-widest flex items-center gap-2">
-            <span className="w-1 h-1 bg-cyan-500 rounded-full animate-pulse" aria-hidden="true" />
+          <div className="font-mono text-[10px] sm:text-xs text-muted-2 tracking-widest flex items-center gap-2">
+            <span className="w-1 h-1 bg-success" aria-hidden="true" />
             QUERY_RESULT: {filteredProjects.length} / {projects.length} PROJECT{projects.length !== 1 ? 'S' : ''}
           </div>
         </div>
@@ -156,11 +153,11 @@ export function ProjectsList({ projects }: ProjectsListProps) {
               >
                 🔍
               </motion.div>
-              <h3 className="text-lg sm:text-xl font-bold text-white mb-2 font-mono">NO_SIGNAL_FOUND</h3>
-              <p className="text-sm sm:text-base text-gray-400 mb-6">Try adjusting your search criteria.</p>
+              <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2 font-mono">NO_SIGNAL_FOUND</h3>
+              <p className="text-sm sm:text-base text-muted mb-6">Try adjusting your search criteria.</p>
               <button
                 onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }}
-                className="px-5 py-2 rounded-full border border-cyan-500/40 text-cyan-400 hover:bg-cyan-500/10 transition-colors text-sm font-mono"
+                className="px-5 py-2 rounded-[8px] border border-hairline text-accent hover:border-accent transition-colors text-sm font-mono"
               >
                 RESET_FILTERS
               </button>

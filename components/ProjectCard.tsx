@@ -131,7 +131,7 @@ export function ProjectCard({ project, index, featured = false }: ProjectCardPro
         <div className="absolute inset-0 bg-gradient-to-r from-gray-900/90 to-black/90 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-white/10 shadow-2xl transform transition-transform duration-500 group-hover:scale-[1.01]" />
         
         {/* Glowing Border Effect */}
-        <div className="absolute -inset-[1px] bg-gradient-to-r from-cyan-500/50 via-purple-500/50 to-cyan-500/50 rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500" />
+        <div className="absolute -inset-[1px] bg-accent/30 rounded-2xl sm:rounded-3xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500" />
 
         {/* Cursor spotlight */}
         <motion.div
@@ -184,12 +184,12 @@ export function ProjectCard({ project, index, featured = false }: ProjectCardPro
                 {categories.map((cat, i) => (
                   <motion.span 
                     key={i} 
-                    className="px-2 sm:px-3 py-1 text-[10px] sm:text-xs rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 relative overflow-hidden group/badge"
+                    className="px-2 sm:px-3 py-1 text-[10px] sm:text-xs rounded-full bg-white/[0.03] text-muted border border-hairline relative overflow-hidden group/badge"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <motion.div
-                      className="absolute inset-0 bg-purple-500/20"
+                      className="absolute inset-0 bg-white/[0.06]"
                       initial={{ x: '-100%' }}
                       whileHover={{ x: '100%' }}
                       transition={{ duration: 0.5 }}
@@ -200,13 +200,13 @@ export function ProjectCard({ project, index, featured = false }: ProjectCardPro
                 <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm text-gray-400 font-mono ml-auto">
                   <span className="flex items-center gap-1">
                     <Calendar size={12} className="sm:w-3.5 sm:h-3.5" />
-                    <span className="hidden sm:inline">{new Date(project.startedAt || '').toLocaleDateString()}</span>
+                    <span className="hidden sm:inline">{new Date(project.startedAt || '').toLocaleDateString('en-US')}</span>
                     <span className="sm:hidden">{new Date(project.startedAt || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                   </span>
                   {project.finishedAt && (
                     <>
                       <span>→</span>
-                      <span className="hidden sm:inline">{new Date(project.finishedAt).toLocaleDateString()}</span>
+                      <span className="hidden sm:inline">{new Date(project.finishedAt).toLocaleDateString('en-US')}</span>
                       <span className="sm:hidden">{new Date(project.finishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                     </>
                   )}

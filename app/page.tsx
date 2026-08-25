@@ -1,69 +1,57 @@
-import { getHomeView, getStatistics } from '@/lib/data';
-import { Hero } from '@/components/Hero';
-import { Stats } from '@/components/Stats';
-import { Skills } from '@/components/Skills';
-import { Contact } from '@/components/Contact';
-import { Background } from '@/components/Background';
-import { VisitorCounter } from '@/components/VisitorCounter';
-import { BrainCursor } from '@/components/BrainCursor';
-import { ProfileHighlight } from '@/components/ProfileHighlight';
-import { Preloader } from '@/components/Preloader';
-import { Navbar } from '@/components/Navbar';
-import { Shell } from '@/components/Shell';
 import type { Metadata } from 'next';
-
-export const dynamic = 'force-dynamic';
+import { SiteNav } from '@/components/home/SiteNav';
+import { Hero } from '@/components/home/Hero';
+import { QuickFacts } from '@/components/home/QuickFacts';
+import { TechMarquee } from '@/components/home/TechMarquee';
+import { Expertise } from '@/components/home/Expertise';
+import { Experience } from '@/components/home/Experience';
+import { FeaturedWork } from '@/components/home/FeaturedWork';
+import { ContactSection } from '@/components/home/ContactSection';
+import { VisitorCounter } from '@/components/VisitorCounter';
+import { EXPERTISE, FEATURED_PROJECTS, PROFILE } from '@/content/home';
 
 const siteUrl = 'https://vicoworks.com';
 
 export const metadata: Metadata = {
   title: 'Home - AI Engineer Portfolio',
-  description: 'Vico Aritonang - AI Engineer and Software Developer. Explore my portfolio showcasing AI engineering projects, software development skills, and technological innovations. Specialized in Artificial Intelligence, Machine Learning, and cutting-edge software solutions.',
-  keywords: ['Vico Aritonang', 'AI Engineer', 'Artificial Intelligence Engineer', 'Software Engineer', 'Vico', 'AI Engineering', 'Portfolio'],
+  description:
+    'Vico Aritonang - AI Engineer and Software Developer. Explore my portfolio showcasing AI engineering projects, software development skills, and technological innovations. Specialized in Artificial Intelligence, Machine Learning, and cutting-edge software solutions.',
+  keywords: [
+    'Vico Aritonang',
+    'AI Engineer',
+    'Artificial Intelligence Engineer',
+    'Software Engineer',
+    'Vico',
+    'AI Engineering',
+    'Portfolio',
+  ],
   alternates: {
     canonical: siteUrl,
   },
   openGraph: {
     title: 'Vico Aritonang - AI Engineer & Software Developer Portfolio',
-    description: 'AI Engineer and Software Developer specializing in Artificial Intelligence, Machine Learning, and innovative software solutions.',
+    description:
+      'AI Engineer and Software Developer specializing in Artificial Intelligence, Machine Learning, and innovative software solutions.',
     url: siteUrl,
     type: 'website',
   },
 };
 
-export default async function Home() {
-  const homeData = await getHomeView();
-  const statsData = await getStatistics();
-
-  if (!homeData || !statsData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-white bg-black px-4">
-        <div className="text-center">
-          <h1 className="text-xl sm:text-2xl mb-4">Loading Portfolio...</h1>
-          <p className="text-sm sm:text-base text-gray-400">Connecting to neural network...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Structured Data for SEO
+export default function Home() {
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'Person',
     name: 'Vico Aritonang',
     jobTitle: 'AI Engineer',
-    description: 'AI Engineer and Software Developer specializing in Artificial Intelligence and Machine Learning',
+    description:
+      'AI Engineer and Software Developer specializing in Artificial Intelligence and Machine Learning',
     url: siteUrl,
-    sameAs: [
-      homeData.Github || 'https://github.com/VicoAritonang',
-      homeData.linkedIn,
-    ].filter(Boolean),
-    knowsAbout: homeData.skill?.split(';').map(s => s.trim()) || [],
+    sameAs: [PROFILE.github, PROFILE.linkedin],
+    knowsAbout: EXPERTISE.map((e) => e.title),
     alumniOf: {
       '@type': 'Organization',
-      name: 'Educational Institution'
+      name: 'University of Indonesia',
     },
-    image: homeData.image_url || `${siteUrl}/og-image.jpg`,
   };
 
   const portfolioStructuredData = {
@@ -77,6 +65,12 @@ export default async function Home() {
       name: 'Vico Aritonang',
       jobTitle: 'AI Engineer',
     },
+    hasPart: FEATURED_PROJECTS.map((p) => ({
+      '@type': 'CreativeWork',
+      name: p.name,
+      description: p.body,
+      url: p.href,
+    })),
   };
 
   return (
@@ -89,29 +83,19 @@ export default async function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(portfolioStructuredData) }}
       />
-      <Preloader />
-      <Navbar />
-      <Shell
-        data={{
-          email: homeData.gmail || 'vicoaritonang5@gmail.com',
-          github: homeData.Github,
-          linkedin: homeData.linkedIn,
-          whatsapp: homeData.whatsapp,
-          resumeUrl: homeData.resume_url,
-          skills: homeData.skill?.split(';').map(s => s.trim()).filter(Boolean) || [],
-          overview: homeData.overview,
-        }}
-      />
-      <main className="min-h-screen relative overflow-x-hidden font-sans">
+      <SiteNav />
+      <main className="relative min-h-screen overflow-x-hidden bg-background font-sans">
         <VisitorCounter />
-        <Background />
-        <BrainCursor />
+        {/* Hairline grid backdrop, faded out below the fold. */}
+        <div className="spec-grid pointer-events-none fixed inset-0 z-0" aria-hidden="true" />
 
-        <Hero data={homeData} />
-        <Stats data={statsData} />
-        <Skills data={homeData} />
-        <ProfileHighlight data={homeData} />
-        <Contact data={homeData} />
+        <Hero />
+        <QuickFacts />
+        <TechMarquee />
+        <Expertise />
+        <Experience />
+        <FeaturedWork />
+        <ContactSection />
       </main>
     </>
   );
