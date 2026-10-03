@@ -14,27 +14,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  /*
-   * Google has already indexed four case-study URLs from the version of this
-   * site currently live: /projects/avagenc, /projects/datafact,
-   * /projects/nusaverify and /projects/robot-tutor-rl. This redesign has no
-   * [slug] route, so the moment it deploys those four become 404s and their
-   * accumulated ranking is thrown away.
-   *
-   * 307 rather than 301 on purpose: a 301 is cached hard by browsers and
-   * treated by Google as final, which would fight you if the case-study pages
-   * come back. Once their fate is decided, make this 301 (gone for good) or
-   * delete the block (they are back).
-   */
-  async redirects() {
-    return [
-      {
-        source: '/projects/:slug',
-        destination: '/projects',
-        permanent: false,
-      },
-    ];
-  },
   // Headers for SEO and security
   async headers() {
     return [

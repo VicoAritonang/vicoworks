@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next';
 import { SITE_DESCRIPTION, SITE_TITLE } from '@/lib/seo';
 
 /* Replaces public/manifest.json, which pointed at /icon-192.png and
-   /icon-512.png — neither of which exists in public/, so both 404'd and the
+   /icon-512.png – neither of which exists in public/, so both 404'd and the
    manifest was invalid. These two files do exist. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -11,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: SITE_DESCRIPTION,
     start_url: '/',
     display: 'standalone',
-    background_color: '#0a0a0c',
-    theme_color: '#0a0a0c',
+    background_color: '#000000',
+    theme_color: '#000000',
     lang: 'en-ID',
     categories: ['portfolio', 'technology', 'business'],
     icons: [

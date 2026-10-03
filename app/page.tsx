@@ -1,21 +1,21 @@
 import type { Metadata } from 'next';
-import { SiteNav } from '@/components/home/SiteNav';
+import { SiteNav } from '@/components/site/SiteNav';
+import { SiteFooter } from '@/components/site/SiteFooter';
+import { PageFrame } from '@/components/site/PageFrame';
 import { Hero } from '@/components/home/Hero';
-import { QuickFacts } from '@/components/home/QuickFacts';
-import { TechMarquee } from '@/components/home/TechMarquee';
-import { Expertise } from '@/components/home/Expertise';
-import { Experience } from '@/components/home/Experience';
-import { FeaturedWork } from '@/components/home/FeaturedWork';
-import { ContactSection } from '@/components/home/ContactSection';
+import { Bento } from '@/components/home/Bento';
+import { CuratedWork } from '@/components/home/CuratedWork';
+import { Explore } from '@/components/home/Explore';
+import { ContactCta } from '@/components/home/ContactCta';
 import { VisitorCounter } from '@/components/VisitorCounter';
 import { EXPERIENCE, FEATURED_PROJECTS } from '@/content/home';
 import { LOCATION, SITE_DESCRIPTION, SITE_URL } from '@/lib/seo';
 
 export const metadata: Metadata = {
   /* No `title` override. The homepage wants the root default,
-     "Vico Aritonang — AI Engineer in Indonesia". The old value was
+     "Vico Aritonang – AI Engineer in Indonesia". The old value was
      "Home - AI Engineer Portfolio", which pushed the name out of the title
-     entirely and spent the first word on "Home" — a word nobody searches. */
+     entirely and spent the first word on "Home" – a word nobody searches. */
   /* Nothing else is set here on purpose. Next replaces `openGraph` and
      `alternates` wholesale rather than merging them field by field, so an
      override this page did not need was quietly dropping og:locale and the
@@ -33,13 +33,13 @@ export default function Home() {
     '@type': 'ProfilePage',
     '@id': `${SITE_URL}/#profilepage`,
     url: SITE_URL,
-    name: 'Vico Aritonang — AI Engineer in Indonesia',
+    name: 'Vico Aritonang – AI Engineer in Indonesia',
     description: SITE_DESCRIPTION,
     inLanguage: 'en-ID',
     isPartOf: { '@id': `${SITE_URL}/#website` },
     mainEntity: { '@id': `${SITE_URL}/#vico` },
     about: { '@id': `${SITE_URL}/#vico` },
-    significantLink: FEATURED_PROJECTS.map((p) => p.href),
+    significantLink: FEATURED_PROJECTS.map((p) => (p.caseStudy ? `${SITE_URL}/projects/${p.slug}` : p.href)),
   };
 
   const workHistory = {
@@ -54,8 +54,9 @@ export default function Home() {
         '@type': 'CreativeWork',
         name: p.name,
         description: p.body,
-        url: p.href,
-        /* `p.year` is "2025-26" / "2025 — present", not an ISO date, so it
+        url: p.caseStudy ? `${SITE_URL}/projects/${p.slug}` : p.href,
+        ...(p.caseStudy ? { sameAs: p.href } : {}),
+        /* `p.year` is "2025-26" / "2025 – present", not an ISO date, so it
            goes in temporalCoverage. Putting it in dateCreated would emit
            schema Google reads as malformed. */
         temporalCoverage: p.year,
@@ -80,7 +81,7 @@ export default function Home() {
       item: {
         '@type': 'Role',
         roleName: e.role,
-        description: `${e.org} · ${e.period} — ${e.body}`,
+        description: `${e.org} · ${e.period} – ${e.body}`,
       },
     })),
   };
@@ -100,19 +101,17 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(employment) }}
       />
       <SiteNav />
-      <main className="relative min-h-screen overflow-x-hidden bg-background font-sans">
+      <main id="main" className="relative">
         <VisitorCounter />
-        {/* Hairline grid backdrop, faded out below the fold. */}
-        <div className="spec-grid pointer-events-none fixed inset-0 z-0" aria-hidden="true" />
-
-        <Hero />
-        <QuickFacts />
-        <TechMarquee />
-        <Expertise />
-        <Experience />
-        <FeaturedWork />
-        <ContactSection />
+        <PageFrame>
+          <Hero />
+          <Bento />
+          <CuratedWork />
+          <Explore />
+          <ContactCta />
+        </PageFrame>
       </main>
+      <SiteFooter />
     </>
   );
 }

@@ -1,5 +1,6 @@
 import { supabase } from './supabase';
 import { Database } from '@/types/database';
+import { enDash } from './text';
 
 export type HomeViewData = Database['public']['Tables']['home_view']['Row'];
 export type StatisticsData = Database['public']['Tables']['statistics']['Row'];
@@ -67,7 +68,7 @@ export async function getProjects(): Promise<ProjectData[]> {
       console.error('Error fetching projects:', error);
       return [];
     }
-    return data || [];
+    return enDash(data || []);
   } catch (error) {
     console.error('Unexpected error in getProjects:', error);
     return [];

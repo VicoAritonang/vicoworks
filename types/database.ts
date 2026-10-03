@@ -46,6 +46,7 @@ export interface Database {
           Github?: string | null
           resume_url?: string | null
         }
+        Relationships: []
       }
       projects: {
         Row: {
@@ -87,6 +88,30 @@ export interface Database {
           like_count?: number | null
           project_url?: string | null
         }
+        Relationships: []
+      }
+      guestbook: {
+        Row: {
+          id: string
+          name: string
+          message: string
+          created_at: string
+          hidden: boolean
+        }
+        Insert: {
+          id?: string
+          name: string
+          message: string
+          ip_hash?: string | null
+          created_at?: string
+          hidden?: boolean
+        }
+        Update: {
+          name?: string
+          message?: string
+          hidden?: boolean
+        }
+        Relationships: []
       }
       statistics: {
         Row: {
@@ -107,8 +132,13 @@ export interface Database {
           project_count?: number | null
           system_in_production?: number | null
         }
+        Relationships: []
       }
     }
+    Views: { [_ in never]: never }
+    Functions: { [_ in never]: never }
+    Enums: { [_ in never]: never }
+    CompositeTypes: { [_ in never]: never }
   }
 }
 

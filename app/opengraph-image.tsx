@@ -1,16 +1,20 @@
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { ImageResponse } from 'next/og';
-import { LOCATION } from '@/lib/seo';
+import { PROFILE_PHOTO } from '@/content/home';
 
-/* The old metadata pointed at /og-image.jpg, which was never committed to
-   public/. Every LinkedIn, WhatsApp and Twitter share of vicoworks.com
-   rendered a blank card — and a share with no card is a link nobody clicks,
-   which is a backlink that never earns its ranking value. */
+/* The share card: what LinkedIn, WhatsApp, X and Slack show for every link
+   to vicoworks.com. Name, role and face – the three things that make someone
+   recognise a person in a feed. */
 
-export const alt = 'Vico Aritonang — AI Engineer in Indonesia';
+export const alt = 'Vico Aritonang – AI Engineer in Indonesia';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
 export default async function OpengraphImage() {
+  const photo = await readFile(path.join(process.cwd(), 'public', PROFILE_PHOTO));
+  const photoSrc = `data:image/jpeg;base64,${photo.toString('base64')}`;
+
   return new ImageResponse(
     (
       <div
@@ -18,81 +22,67 @@ export default async function OpengraphImage() {
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          background: '#0a0a0c',
-          backgroundImage:
-            'radial-gradient(circle at 78% 22%, rgba(34,211,238,0.20) 0%, transparent 55%)',
-          padding: '72px 80px',
-          color: '#eef0f1',
-          fontFamily: 'sans-serif',
+          background: '#000',
+          color: '#fafafa',
+          fontFamily: 'serif',
+          position: 'relative',
         }}
       >
+        {/* colourful glow */}
         <div
           style={{
-            display: 'flex',
-            fontSize: 22,
-            letterSpacing: 6,
-            color: '#22d3ee',
-            fontWeight: 700,
+            position: 'absolute',
+            right: -120,
+            bottom: -200,
+            width: 700,
+            height: 700,
+            borderRadius: 9999,
+            background: 'radial-gradient(circle, rgba(240,0,204,0.35) 0%, rgba(0,68,255,0.25) 40%, transparent 70%)',
           }}
-        >
-          VICOWORKS.COM
+        />
+        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '64px 72px', flex: 1 }}>
+          <div style={{ display: 'flex', fontSize: 22, letterSpacing: 6, color: '#a1a1a1', fontFamily: 'monospace' }}>
+            VICOWORKS.COM
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', fontSize: 92, lineHeight: 1, letterSpacing: -2 }}>Vico Aritonang</div>
+            <div
+              style={{
+                display: 'flex',
+                marginTop: 18,
+                fontSize: 64,
+                fontStyle: 'italic',
+                backgroundImage: 'linear-gradient(90deg, #04f, #f0c, #ff8000)',
+                backgroundClip: 'text',
+                color: 'transparent',
+              }}
+            >
+              AI engineer
+            </div>
+            <div style={{ display: 'flex', marginTop: 28, fontSize: 28, color: '#d4d4d4', fontFamily: 'sans-serif' }}>
+              Agentic AI · RAG · Go · Cloud
+            </div>
+          </div>
+          <div style={{ display: 'flex', fontSize: 18, color: '#737373', fontFamily: 'monospace', letterSpacing: 2 }}>
+            JAKARTA, INDONESIA · CO-FOUNDER @ AVAGENC
+          </div>
         </div>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', paddingRight: 72 }}>
           <div
             style={{
               display: 'flex',
-              fontSize: 84,
-              fontWeight: 800,
-              lineHeight: 1.02,
-              letterSpacing: -2,
+              padding: 10,
+              borderRadius: 32,
+              border: '1px solid #262626',
+              transform: 'rotate(4deg)',
             }}
           >
-            Vico Aritonang
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={photoSrc} alt="" width={330} height={440} style={{ borderRadius: 22, objectFit: 'cover', objectPosition: 'top' }} />
           </div>
-          {/* Satori requires one text child per node unless the node is
-              explicitly flex — hence the template literal rather than
-              interpolating mid-sentence. */}
-          <div style={{ display: 'flex', fontSize: 44, fontWeight: 700, color: '#22d3ee' }}>
-            {`AI Engineer · ${LOCATION.country}`}
-          </div>
-          <div
-            style={{
-              display: 'flex',
-              fontSize: 27,
-              color: '#a7abb2',
-              lineHeight: 1.5,
-              maxWidth: 900,
-            }}
-          >
-            {'Agentic AI & LLM orchestration, automation systems, Go microservices, and cloud infrastructure on GCP and AWS.'}
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            gap: 14,
-            fontSize: 21,
-            color: '#8d929b',
-            borderTop: '1px solid rgba(255,255,255,0.14)',
-            paddingTop: 26,
-          }}
-        >
-          <span>Agentic AI</span>
-          <span style={{ color: '#3a3e45' }}>/</span>
-          <span>RAG</span>
-          <span style={{ color: '#3a3e45' }}>/</span>
-          <span>Go</span>
-          <span style={{ color: '#3a3e45' }}>/</span>
-          <span>GCP · AWS</span>
-          <span style={{ color: '#3a3e45' }}>/</span>
-          <span>{LOCATION.label}</span>
         </div>
       </div>
     ),
-    size,
+    size
   );
 }

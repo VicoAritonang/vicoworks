@@ -6,7 +6,7 @@
  * string is five chances for a canonical to point somewhere it should not.
  */
 
-import { AWARDS, EXPERIENCE, EXPERTISE, PROFILE } from '@/content/home';
+import { AWARDS, EXPERIENCE, EXPERTISE, PROFILE, PROFILE_PHOTO } from '@/content/home';
 
 export const SITE_URL = 'https://vicoworks.com';
 
@@ -14,23 +14,23 @@ export const SITE_URL = 'https://vicoworks.com';
    cannot win; "AI engineer Indonesia" is one where being actually Indonesian
    is the ranking signal. Every string below carries the country. */
 export const LOCATION = {
-  locality: 'Depok',
-  region: 'West Java',
-  regionCode: 'ID-JB',
+  locality: 'Jakarta',
+  region: 'DKI Jakarta',
+  regionCode: 'ID-JK',
   country: 'Indonesia',
   countryCode: 'ID',
   /** Search-visible phrasing, used in copy as well as metadata. */
-  label: 'Depok, Greater Jakarta, Indonesia',
+  label: 'Jakarta, Indonesia',
 } as const;
 
-export const SITE_TITLE = 'Vico Aritonang — AI Engineer in Indonesia';
+export const SITE_TITLE = 'Vico Aritonang – AI Engineer in Indonesia';
 
 export const SITE_DESCRIPTION =
-  'Vico Aritonang is an Indonesian AI engineer in Depok, Greater Jakarta, building agentic AI, LLM orchestration and automation systems — with Go microservices and cloud infrastructure on GCP and AWS.';
+  'Vico Aritonang is an Indonesian AI engineer in Jakarta, building agentic AI, LLM orchestration and automation systems – with Go microservices and cloud infrastructure on GCP and AWS.';
 
 /**
  * Keyword list. Google ignores the meta tag, but Bing still reads it and the
- * list doubles as the checklist for what the page copy has to actually say —
+ * list doubles as the checklist for what the page copy has to actually say –
  * a keyword that appears only here and nowhere in the body is a lie.
  */
 export const SITE_KEYWORDS = [
@@ -39,7 +39,6 @@ export const SITE_KEYWORDS = [
   'Indonesian AI Engineer',
   'AI Engineer Indonesia',
   'AI Engineer Jakarta',
-  'AI Engineer Depok',
   'AI Automation Engineer',
   'Agentic AI Engineer',
   'LLM Orchestration',
@@ -51,9 +50,17 @@ export const SITE_KEYWORDS = [
 ];
 
 /**
+ * Every profile that is unmistakably Vico. This list is the single most
+ * important entity signal: Google, Bing and LLMs use it to merge these pages
+ * into one person. Add every public profile here (X, Instagram, Kaggle,
+ * Google Scholar, Devpost...) and link back to vicoworks.com from each one.
+ */
+export const SAME_AS = [PROFILE.github, PROFILE.linkedin];
+
+/**
  * The Person entity. This is the payload that lets Google resolve "Vico" the
  * string into Vico the person, and it is what a knowledge panel is built from,
- * so it carries the identifiers (`sameAs`), the employer and the school —
+ * so it carries the identifiers (`sameAs`), the employer and the school –
  * every corroborating edge back to a page Google already trusts.
  */
 export function personSchema() {
@@ -70,6 +77,20 @@ export function personSchema() {
     jobTitle: 'AI Engineer',
     description: SITE_DESCRIPTION,
     url: SITE_URL,
+    /* A real photo is what AI answers and a knowledge panel show next to the
+       name; without it the entity has no face. */
+    image: {
+      '@type': 'ImageObject',
+      url: `${SITE_URL}${PROFILE_PHOTO}`,
+      caption: 'Vico Aritonang, AI engineer in Jakarta, Indonesia',
+    },
+    mainEntityOfPage: { '@id': `${SITE_URL}/#profilepage` },
+    hasOccupation: {
+      '@type': 'Occupation',
+      name: 'AI Engineer',
+      occupationLocation: { '@type': 'Country', name: LOCATION.country },
+      skills: 'Agentic AI, LLM orchestration, RAG, Go, Python, TypeScript, Next.js, GCP, AWS',
+    },
     email: `mailto:${PROFILE.email}`,
     nationality: { '@type': 'Country', name: LOCATION.country },
     knowsLanguage: ['id-ID', 'en'],
@@ -92,8 +113,11 @@ export function personSchema() {
     worksFor: currentRole
       ? {
           '@type': 'Organization',
+          '@id': 'https://avagenc.com/#organization',
           name: currentRole.org,
-          description: 'AI automation startup',
+          url: 'https://avagenc.com',
+          description: 'AI automation startup building a multi-agent assistant',
+          founder: { '@id': `${SITE_URL}/#vico` },
           address: {
             '@type': 'PostalAddress',
             addressLocality: LOCATION.locality,
@@ -104,11 +128,12 @@ export function personSchema() {
     alumniOf: {
       '@type': 'CollegeOrUniversity',
       name: 'Universitas Indonesia',
-      sameAs: 'https://www.ui.ac.id/',
+      sameAs: ['https://www.ui.ac.id/', 'https://en.wikipedia.org/wiki/University_of_Indonesia'],
     },
+    affiliation: { '@type': 'CollegeOrUniversity', name: 'Universitas Indonesia' },
     /* sameAs is the strongest entity signal available without a Wikipedia
        page: it ties this domain to profiles Google has already indexed. */
-    sameAs: [PROFILE.github, PROFILE.linkedin],
+    sameAs: SAME_AS,
     knowsAbout: [
       ...EXPERTISE.flatMap((e) => e.body.split(', ').map((s) => s.trim())),
       'Agentic AI',

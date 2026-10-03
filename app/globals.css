@@ -1,135 +1,294 @@
 @import "tailwindcss";
 
+/* Class-based dark mode: <html class="dark"> is the default, the nav toggle
+   flips it and remembers the choice in localStorage. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------- Tokens ---------- */
 :root {
-  --background: #0a0a0c;
-  --foreground: #eef0f1;
-  --muted: #8d929b;
-  --muted-2: #52565c;
-  --muted-3: #454951;
-  --border: rgba(255, 255, 255, 0.14);
-  --border-soft: rgba(255, 255, 255, 0.1);
-  --accent: #22d3ee;
-  --accent-hover: #67e8f9;
-  --accent-ink: #04141a;
-  --success: #5fd8a8;
+  --background: #f4f4f4;
+  --foreground: #0a0a0a;
+  --surface: #f9f9fa;
+  --surface-hover: #ffffff;
+  --border: #d4d4d4;
+  --line: color-mix(in oklab, var(--border) 64%, var(--background));
+  --rail: #d4d4d4;
+  --muted: #737373;
+  --muted-2: #8a8a8a;
+  --muted-3: #a3a3a3;
+  --accent: #2563eb;
+  --accent-hover: #3b82f6;
+  --accent-ink: #ffffff;
+  --success: #10b981;
   --radius-sm: 8px;
   --radius-lg: 12px;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-sweep: cubic-bezier(0.2, 0.65, 0.3, 0.9);
+}
+
+.dark {
+  --background: #000000;
+  --foreground: #fafafa;
+  --surface: color-mix(in oklab, #171717 15%, transparent);
+  --surface-hover: color-mix(in oklab, #171717 5%, transparent);
+  --border: #262626;
+  --rail: #262626;
+  --muted: #a1a1a1;
+  --muted-2: #737373;
+  --muted-3: #525252;
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-ink: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-line: var(--line);
   --color-muted: var(--muted);
   --color-muted-2: var(--muted-2);
   --color-muted-3: var(--muted-3);
   --color-hairline: var(--border);
-  --color-hairline-soft: var(--border-soft);
+  --color-hairline-soft: var(--line);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-ink: var(--accent-ink);
   --color-success: var(--success);
-  --font-sans: var(--font-space-grotesk);
-  --font-mono: var(--font-ibm-plex-mono);
+  --font-sans: var(--font-outfit);
+  --font-mono: var(--font-mono-face);
+  --font-serif: var(--font-instrument-serif);
+  --font-display: var(--font-display-face);
+  --spacing-pagebuilder: 4rem;
 }
 
 /* Base element defaults live in @layer base so utility classes (text-*, etc.)
-   still win — unlayered CSS would override every layered Tailwind utility. */
+   still win – unlayered CSS would override every layered Tailwind utility. */
 @layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--line);
+  }
+
   html {
     scroll-behavior: smooth;
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
     background: var(--background);
     color: var(--foreground);
-    font-family: var(--font-space-grotesk), system-ui, sans-serif;
+    font-family: var(--font-outfit), system-ui, sans-serif;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
   }
 
   a {
-    color: var(--accent);
+    color: inherit;
     text-decoration: none;
-  }
-  a:hover {
-    color: var(--accent-hover);
   }
 }
 
 /* ---------- Selection ---------- */
 ::selection {
-  background: rgba(34, 211, 238, 0.3);
+  background: rgb(0 0 0 / 0.1);
+  color: #000;
+}
+.dark ::selection {
+  background: rgb(255 255 255 / 0.12);
   color: #fff;
 }
 
-/* ---------- Scrollbar ---------- */
-::-webkit-scrollbar {
-  width: 10px;
+/* ---------- Page frame ---------- */
+/* The diagonal-hatched side rails that run down the whole page. */
+.hatch {
+  background-image: linear-gradient(
+    45deg,
+    var(--rail) 12.5%,
+    transparent 12.5%,
+    transparent 50%,
+    var(--rail) 50%,
+    var(--rail) 62.5%,
+    transparent 62.5%,
+    transparent 100%
+  );
+  background-size: 5px 5px;
 }
-::-webkit-scrollbar-track {
-  background: var(--background);
+.hatch-wide {
+  background-image: linear-gradient(
+    -45deg,
+    var(--rail) 12.5%,
+    transparent 12.5%,
+    transparent 50%,
+    var(--rail) 50%,
+    var(--rail) 62.5%,
+    transparent 62.5%,
+    transparent 100%
+  );
+  background-size: 6px 6px;
 }
-::-webkit-scrollbar-thumb {
-  background: rgba(34, 211, 238, 0.4);
-  border-radius: 10px;
-  border: 2px solid var(--background);
+
+.dot-grid {
+  background-image: radial-gradient(circle, var(--muted-3) 1px, transparent 1px);
+  background-size: 16px 16px;
+  -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 60%, transparent 100%);
+  mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, #000 60%, transparent 100%);
 }
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(34, 211, 238, 0.7);
+
+/* Hairline that reads as a soft raised edge on chips and cards. */
+.shadow-border {
+  box-shadow: 0 0 0.5px 0.8px rgb(0 0 0 / 0.11), inset 0 0.5px 0.5px 0.5px rgb(255 255 255 / 0.6);
+}
+.dark .shadow-border {
+  box-shadow: inset 0 1px rgb(255 255 255 / 0.1), inset 0 0 0 1px rgb(255 255 255 / 0.06);
+}
+
+/* ---------- Type effects ---------- */
+.text-colorful {
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(288deg, #ff8000, #f0c 53.24%, #04f);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.text-chrome {
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(to bottom, #71717a, #52525b, #18181b);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.dark .text-chrome {
+  background: linear-gradient(to bottom, #3f3f46, #e4e4e7, #fafafa);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.mask-sweep {
+  -webkit-mask-image: linear-gradient(90deg, #000 70%, transparent);
+  mask-image: linear-gradient(90deg, #000 70%, transparent);
+  -webkit-mask-position: 0;
+  mask-position: 0;
+  -webkit-mask-size: 200% 100%;
+  mask-size: 200% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 /* ---------- Keyframes ---------- */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes headline-in {
+  from { opacity: 0; transform: translateY(22px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes mask-sweep {
+  from { -webkit-mask-size: 0 100%; mask-size: 0 100%; }
+  to { -webkit-mask-size: 200% 100%; mask-size: 200% 100%; }
+}
+@keyframes draw-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes shiny {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+@keyframes spin-slow {
+  to { transform: rotate(360deg); }
+}
 @keyframes marquee {
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
-@keyframes breathe {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+@keyframes orbit {
+  to { transform: rotate(360deg); }
+}
+@keyframes orbit-rev {
+  to { transform: rotate(-360deg); }
 }
 @keyframes blink-caret {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
 }
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes draw-path {
+  from { stroke-dashoffset: 420; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes beam {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(200%); }
+}
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-rise-in { animation: rise-in 0.7s var(--ease-out-quint) backwards; }
+.animate-headline-in { animation: headline-in 0.95s var(--ease-out-expo) backwards; }
+.animate-mask-sweep { animation: mask-sweep 1.8s var(--ease-sweep) backwards; }
+.animate-draw-in { animation: draw-in 0.9s var(--ease-out-expo) backwards; }
+.animate-gradient-x { background-size: 200% 200%; animation: gradient-x 6s ease infinite; }
+.animate-spin-slow { animation: spin-slow 14s linear infinite; }
+.animate-float { animation: float-y 4s ease-in-out infinite; }
+
+/* Light sweep across muted text, as on the "New launch" pill. */
+.shiny-text {
+  background-image: linear-gradient(
+    110deg,
+    currentColor 35%,
+    var(--foreground) 50%,
+    currentColor 65%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shiny 2.6s linear infinite;
+}
+
+/* Deliverable chips in the bento: stacked at rest, fanned upward on hover. */
+.spread-chip { transform: translateY(0) scale(var(--s, 1)); }
+.group:hover .spread-chip { transform: translateY(var(--spread, 0)) scale(1); }
 
 .marquee-track {
   display: flex;
   width: max-content;
   animation: marquee 32s linear infinite;
 }
-.marquee-track:hover {
-  animation-play-state: paused;
-}
 
-/* Fades the marquee out at both edges instead of hard-cutting it. */
-.marquee-mask {
-  -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
-  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+/* ---------- Scrollbar ---------- */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 10px;
+  border: 2px solid var(--background);
 }
+::-webkit-scrollbar-thumb:hover { background: var(--muted-2); }
 
-/* Hero backdrop: hairline grid that fades out below the fold. */
-.spec-grid {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 64px 64px;
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
-}
-
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-hide {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* ---------- Reduced motion ---------- */
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+  html { scroll-behavior: auto; }
   *,
   *::before,
   *::after {
