@@ -8,7 +8,11 @@ import { ParticleBurst } from './ParticleBurst';
 
 /** Typewriter that cycles the role list: type, hold, delete, next. */
 function useRoleTypewriter() {
-  const [text, setText] = useState('');
+  /* Seeded with the first role already fully typed, not ''. The cycle is
+     identical from the second role onwards, but the server-rendered HTML now
+     contains the words "AI Engineer" next to the h1 instead of an empty span.
+     A crawler that does not execute the effect still reads the job title. */
+  const [text, setText] = useState<string>(ROLES[0]);
   const [index, setIndex] = useState(0);
   const [deleting, setDeleting] = useState(false);
 
@@ -52,12 +56,20 @@ export function Hero() {
           <h1 className="m-0 mb-1.5 font-mono text-[clamp(42px,6.4vw,78px)] font-extrabold leading-[1.03] tracking-[-0.02em] text-foreground">
             {PROFILE.firstName} <span className="text-accent">{PROFILE.lastName}</span>
           </h1>
+          {/* The legal name plus the two facts the target query is made of:
+              the role and the country. Same micro-line, same design weight —
+              it just says something a search engine can use now. */}
           <div className="mb-[26px] font-mono text-[11px] tracking-[0.1em] text-muted-3">
             {PROFILE.fullName}
+            <span className="px-1.5 text-[#3a3e45]">/</span>
+            {PROFILE.tagline}
           </div>
 
           <div className="mb-7 flex h-[26px] items-center gap-2.5 font-mono text-[clamp(14px,1.7vw,17px)] text-[#c7cbd1]">
-            <span className="text-muted-2">&gt;_</span>
+            <span className="text-muted-2" aria-hidden="true">&gt;_</span>
+            {/* aria-live off: a caret retyping four job titles on a loop is
+                noise to a screen reader, and the roles are already in the
+                summary below. Crawlers read the DOM text either way. */}
             <span>{roleText}</span>
             <span
               className="inline-block w-0.5 bg-accent"

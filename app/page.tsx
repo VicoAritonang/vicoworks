@@ -8,68 +8,80 @@ import { Experience } from '@/components/home/Experience';
 import { FeaturedWork } from '@/components/home/FeaturedWork';
 import { ContactSection } from '@/components/home/ContactSection';
 import { VisitorCounter } from '@/components/VisitorCounter';
-import { EXPERTISE, FEATURED_PROJECTS, PROFILE } from '@/content/home';
-
-const siteUrl = 'https://vicoworks.com';
+import { EXPERIENCE, FEATURED_PROJECTS } from '@/content/home';
+import { LOCATION, SITE_DESCRIPTION, SITE_URL } from '@/lib/seo';
 
 export const metadata: Metadata = {
-  title: 'Home - AI Engineer Portfolio',
-  description:
-    'Vico Aritonang - AI Engineer and Software Developer. Explore my portfolio showcasing AI engineering projects, software development skills, and technological innovations. Specialized in Artificial Intelligence, Machine Learning, and cutting-edge software solutions.',
-  keywords: [
-    'Vico Aritonang',
-    'AI Engineer',
-    'Artificial Intelligence Engineer',
-    'Software Engineer',
-    'Vico',
-    'AI Engineering',
-    'Portfolio',
-  ],
-  alternates: {
-    canonical: siteUrl,
-  },
-  openGraph: {
-    title: 'Vico Aritonang - AI Engineer & Software Developer Portfolio',
-    description:
-      'AI Engineer and Software Developer specializing in Artificial Intelligence, Machine Learning, and innovative software solutions.',
-    url: siteUrl,
-    type: 'website',
-  },
+  /* No `title` override. The homepage wants the root default,
+     "Vico Aritonang — AI Engineer in Indonesia". The old value was
+     "Home - AI Engineer Portfolio", which pushed the name out of the title
+     entirely and spent the first word on "Home" — a word nobody searches. */
+  /* Nothing else is set here on purpose. Next replaces `openGraph` and
+     `alternates` wholesale rather than merging them field by field, so an
+     override this page did not need was quietly dropping og:locale and the
+     profile:* tags the root layout declares. */
+  description: SITE_DESCRIPTION,
 };
 
 export default function Home() {
-  const structuredData = {
+  /* The Person entity itself is emitted site-wide from layout.tsx. This page
+     adds the ProfilePage wrapper Google expects on a personal landing page,
+     and points `mainEntity` at the same @id so the two merge into one node
+     instead of competing as two. */
+  const profilePage = {
     '@context': 'https://schema.org',
-    '@type': 'Person',
-    name: 'Vico Aritonang',
-    jobTitle: 'AI Engineer',
-    description:
-      'AI Engineer and Software Developer specializing in Artificial Intelligence and Machine Learning',
-    url: siteUrl,
-    sameAs: [PROFILE.github, PROFILE.linkedin],
-    knowsAbout: EXPERTISE.map((e) => e.title),
-    alumniOf: {
-      '@type': 'Organization',
-      name: 'University of Indonesia',
-    },
+    '@type': 'ProfilePage',
+    '@id': `${SITE_URL}/#profilepage`,
+    url: SITE_URL,
+    name: 'Vico Aritonang — AI Engineer in Indonesia',
+    description: SITE_DESCRIPTION,
+    inLanguage: 'en-ID',
+    isPartOf: { '@id': `${SITE_URL}/#website` },
+    mainEntity: { '@id': `${SITE_URL}/#vico` },
+    about: { '@id': `${SITE_URL}/#vico` },
+    significantLink: FEATURED_PROJECTS.map((p) => p.href),
   };
 
-  const portfolioStructuredData = {
+  const workHistory = {
     '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: 'Vico Aritonang Portfolio',
-    description: 'Portfolio showcasing AI engineering projects and software development work',
-    url: siteUrl,
-    mainEntity: {
-      '@type': 'Person',
-      name: 'Vico Aritonang',
-      jobTitle: 'AI Engineer',
-    },
-    hasPart: FEATURED_PROJECTS.map((p) => ({
-      '@type': 'CreativeWork',
-      name: p.name,
-      description: p.body,
-      url: p.href,
+    '@type': 'ItemList',
+    '@id': `${SITE_URL}/#work`,
+    name: 'Selected AI engineering work by Vico Aritonang',
+    itemListElement: FEATURED_PROJECTS.map((p, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'CreativeWork',
+        name: p.name,
+        description: p.body,
+        url: p.href,
+        /* `p.year` is "2025-26" / "2025 — present", not an ISO date, so it
+           goes in temporalCoverage. Putting it in dateCreated would emit
+           schema Google reads as malformed. */
+        temporalCoverage: p.year,
+        keywords: p.stack,
+        author: { '@id': `${SITE_URL}/#vico` },
+        locationCreated: {
+          '@type': 'Place',
+          name: LOCATION.label,
+        },
+      },
+    })),
+  };
+
+  const employment = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    '@id': `${SITE_URL}/#experience`,
+    name: 'Experience and education',
+    itemListElement: EXPERIENCE.map((e, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'Role',
+        roleName: e.role,
+        description: `${e.org} · ${e.period} — ${e.body}`,
+      },
     })),
   };
 
@@ -77,11 +89,15 @@ export default function Home() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(profilePage) }}
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(portfolioStructuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(workHistory) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(employment) }}
       />
       <SiteNav />
       <main className="relative min-h-screen overflow-x-hidden bg-background font-sans">

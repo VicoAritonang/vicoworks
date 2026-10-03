@@ -12,8 +12,11 @@ export const PROFILE = {
   github: 'https://github.com/VicoAritonang',
   linkedin: 'https://www.linkedin.com/in/vico-winner-sebastian-aritonang-93a609249/',
   resume: '/Vico_Aritonang_CV.pdf',
+  /* Micro-line under the h1. Carries the role and the country, because
+     "AI engineer" on its own is a query nobody local wins. */
+  tagline: 'AI ENGINEER · DEPOK, INDONESIA',
   summary:
-    'I build production-grade agentic AI and automation systems — designing LLM-powered agent orchestration, high-concurrency Go microservices, and cloud-native infrastructure on GCP. Comfortable end-to-end, from Next.js front ends to Python/Go backends and applied machine learning.',
+    "I'm an Indonesian AI engineer based in Depok, Greater Jakarta, building production-grade agentic AI and automation systems — LLM agent orchestration, RAG pipelines, high-concurrency Go microservices, and cloud-native infrastructure on GCP and AWS. Comfortable end-to-end, from Next.js front ends to Python/Go backends and applied machine learning.",
   pipeline: ['AGENTIC AI', 'CLOUD AUTOMATION', 'GO MICROSERVICES', 'RAG SYSTEMS'],
 } as const;
 
