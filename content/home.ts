@@ -117,12 +117,12 @@ export interface FeaturedProject {
   /** Card background. */
   gradient: string;
   /** Accent for the sticky detail panel (line, stars, glow). */
-  color: 'purple' | 'emerald' | 'blue' | 'orange';
+  color: 'purple' | 'emerald' | 'blue' | 'orange' | 'amber';
   /** Highlights listed in the sticky detail panel on desktop. */
   bullets: string[];
-  /** Rendered UI sketch shown until a real screenshot exists. */
-  mock: ProjectMock;
-  /** Drop a screenshot in /public/projects/ and point here, e.g. '/projects/datafact.png'. */
+  /** Rendered UI sketch, used when there is no `image`. */
+  mock?: ProjectMock;
+  /** Real screenshot from /public, e.g. '/project-snapshoot/acep/homepage.png'. Wins over `mock`. */
   image?: string;
   /** Has a case study at /projects/<slug> (content/caseStudies.ts). Cards link there instead of off-site. */
   caseStudy?: boolean;
@@ -174,20 +174,42 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
     caseStudy: true,
     name: 'NusaVerify',
     href: 'https://nusaverify-web.vercel.app/',
-    kind: 'Hackathon',
+    kind: 'Hackathon · Bank Indonesia',
     year: '2026',
-    headline: 'Hoax detection that shows its whole reasoning as a living mind-map',
-    body: 'AI hoax-detection engine visualizing its full reasoning chain as an interactive mind-map. Built for Bank Indonesia.',
-    stack: 'Next.js · LLM · Information Retrieval',
-    tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Gemini', 'Vercel'],
-    gradient: 'linear-gradient(145deg, #1e2a78 0%, #2932cb 40%, #5a6aef 75%, #a0b0ff 100%)',
+    headline: 'Check first, then believe – six AI agents fact-check investment rumours',
+    body: 'Multi-agent verifier for investment information. Paste a stock rumour, an Instagram link or a Telegram screenshot; six agents check BEI, OJK and the financial press in parallel and return a verdict with a live knowledge graph of every source.',
+    stack: 'Go · n8n · Meta Graph API · Next.js · Supabase',
+    tech: ['Go', 'n8n', 'Meta', 'GraphQL', 'Next.js', 'TypeScript', 'Supabase', 'Vercel'],
+    gradient: 'linear-gradient(145deg, #0b1230 0%, #1e2a78 40%, #8a7650 78%, #e9c891 100%)',
     color: 'blue',
     bullets: [
-      'Searches sources and weighs them into a hoax / validity score',
-      'Full reasoning chain rendered as an animated mind-map',
-      'Built for the Bank Indonesia hackathon',
+      'Six agents in parallel: BEI/OJK, CNBC, Kontan, Bisnis, retail sentiment, analyst',
+      'Go agent backend, n8n workflows, Meta Graph API for Instagram posts',
+      'Live reasoning trace: knowledge graph, agent debate, signed confidence verdict',
     ],
     mock: 'mindmap',
+    image: '/project-snapshoot/nusaverify/homepage.png',
+  },
+  {
+    slug: 'acep',
+    caseStudy: true,
+    name: 'ACEP',
+    href: 'https://acep-prototype.vercel.app/',
+    kind: 'Top 6 Finalist · IPB',
+    year: '2026',
+    headline: 'Solar power planning for off-grid industries, one forecast day at a time',
+    body: 'Advanced Clean Energy Planning: a platform that combines a site’s loads, solar generators and batteries with a 14-day weather forecast to show which days the power supply is safe – and which ones are not. Top 6 finalist at the IPB Business Plan Competition 2026.',
+    stack: 'Next.js · Supabase · Open-Meteo · n8n',
+    tech: ['Next.js', 'React', 'TypeScript', 'Tailwind CSS', 'Supabase', 'n8n', 'WebGL', 'Vercel'],
+    gradient: 'linear-gradient(145deg, #052e24 0%, #047857 38%, #f59e0b 78%, #fde68a 100%)',
+    color: 'amber',
+    bullets: [
+      'Energy calendar: safe, warning or insufficient, 14 days ahead',
+      'Battery charge carried day to day against live Open-Meteo forecasts',
+      'Top 6 finalist, Ideanation – IPB Business Plan Competition 2026',
+      'Built as CTO of a two-person company: architecture, data and web app',
+    ],
+    image: '/project-snapshoot/acep/homepage.png',
   },
   {
     slug: 'handlerindonesia',

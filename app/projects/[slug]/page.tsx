@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { BlockTitle, PageShell } from '@/components/site/PageShell';
@@ -89,10 +90,24 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
           <div className="relative z-10 p-5 text-white/80 sm:p-8">
             <p className="max-w-2xl text-lg text-balance sm:text-2xl">{featured?.headline ?? p.outcome}</p>
           </div>
-          {featured && (
+          {featured?.image ? (
             <div className="absolute top-24 right-0 left-0 z-10 flex justify-center px-6 sm:top-32 md:px-24">
-              <ProjectMock kind={featured.mock} />
+              <Image
+                src={featured.image}
+                alt={`${p.name} – screenshot of the live product`}
+                width={1600}
+                height={1000}
+                priority
+                sizes="(min-width: 1024px) 900px, 100vw"
+                className="h-auto w-full rounded-t-md border-2 border-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.4),0_15px_50px_-5px_rgba(0,0,0,0.5)]"
+              />
             </div>
+          ) : (
+            featured?.mock && (
+              <div className="absolute top-24 right-0 left-0 z-10 flex justify-center px-6 sm:top-32 md:px-24">
+                <ProjectMock kind={featured.mock} />
+              </div>
+            )
           )}
         </div>
       </div>

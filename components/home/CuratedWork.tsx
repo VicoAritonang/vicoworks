@@ -17,6 +17,7 @@ const ACCENT = {
   emerald: { fill: 'fill-emerald-500 dark:fill-emerald-400', bg: 'bg-emerald-500 dark:bg-emerald-400', glow: 'drop-shadow-[0_0_16px_rgb(16_185_129/0.9)]', text: 'text-emerald-600 dark:text-emerald-400' },
   blue: { fill: 'fill-blue-500 dark:fill-blue-400', bg: 'bg-blue-500 dark:bg-blue-400', glow: 'drop-shadow-[0_0_16px_rgb(59_130_246/0.9)]', text: 'text-blue-600 dark:text-blue-400' },
   orange: { fill: 'fill-orange-500 dark:fill-orange-400', bg: 'bg-orange-500 dark:bg-orange-400', glow: 'drop-shadow-[0_0_16px_rgb(249_115_22/0.9)]', text: 'text-orange-600 dark:text-orange-400' },
+  amber: { fill: 'fill-amber-500 dark:fill-amber-400', bg: 'bg-amber-500 dark:bg-amber-400', glow: 'drop-shadow-[0_0_16px_rgb(245_158_11/0.9)]', text: 'text-amber-600 dark:text-amber-400' },
 } as const;
 
 /* ---------- Cursor follower ---------- */
@@ -131,7 +132,7 @@ function ProjectVisual({ p, large = false }: { p: FeaturedProject; large?: boole
           {p.image ? (
             <Image src={p.image} alt={`${p.name} screenshot`} width={1600} height={1000} className="h-auto w-full rounded-t-sm border-2 border-white/50 shadow-[0_4px_20px_rgba(0,0,0,0.4),0_15px_50px_-5px_rgba(0,0,0,0.5)] lg:border-3" />
           ) : (
-            <ProjectMock kind={p.mock} />
+            p.mock && <ProjectMock kind={p.mock} />
           )}
         </div>
       </div>

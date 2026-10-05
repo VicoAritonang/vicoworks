@@ -266,107 +266,270 @@ export const projects: Project[] = [
     slug: 'nusaverify',
     name: 'NusaVerify',
     year: '2026',
-    role: 'Engineer – Bank Indonesia hackathon',
+    role: 'AI & full-stack engineer – Bank Indonesia hackathon',
     status: 'live',
     featured: true,
     order: 3,
     oneLiner:
-      'A fact-checker that scores how likely a claim is to be a hoax, and shows the entire reasoning chain behind the number.',
-    outcome: 'Built for the Bank Indonesia hackathon. Live at nusaverify-web.vercel.app.',
-    stack: ['Next.js', 'TypeScript', 'LLM', 'Information retrieval', 'Vercel'],
-    categories: ['AI Engineering', 'Frontend'],
-    links: { live: 'https://nusaverify-web.vercel.app/' },
+      'Paste a market rumour, an Instagram link or a Telegram screenshot – six AI agents check it against BEI, OJK and the financial press, and return a verdict with every source attached.',
+    outcome:
+      'Built for the Bank Indonesia hackathon. Live at nusaverify-web.vercel.app, covering stocks, crypto, forex, gold and macro claims.',
+    stack: [
+      'Go',
+      'n8n',
+      'Meta Graph API',
+      'GraphQL',
+      'Next.js',
+      'TypeScript',
+      'Supabase',
+      'Tailwind CSS',
+      'Vercel',
+    ],
+    categories: ['Agentic AI', 'AI Engineering', 'Backend & cloud'],
+    links: {
+      live: 'https://nusaverify-web.vercel.app/',
+      repo: 'https://github.com/VicoAritonang/nusaverify-web',
+    },
     /* TODO(vico): swap `youtubeId` for your own recording. Everything else
        on the page is real; this reel is the one stand-in left. */
     video: {
       youtubeId: 'qn9g0i1TV5c',
-      title: 'NusaVerify – checking a claim, and reading the reasoning',
+      title: 'NusaVerify – checking an investment claim, and reading the trace',
       caption:
-        'Recorded walkthrough: a claim goes in, sources are scored one at a time, and the mind-map shows what moved the number.',
+        'Recorded walkthrough: a robot-trading promo goes in, six agents fan out, the knowledge graph builds itself, and the verdict lands with its sources.',
       placeholder: true,
     },
     diagram: {
       caption:
-        'Each source is scored on its own, then combined – so disagreement stays visible instead of averaging away.',
+        'Six agents run in parallel, each scoring the claim on its own. Supabase holds the trace, so the browser can watch the reasoning while it is still happening.',
       nodes: [
-        { id: 'claim', label: 'Claim', sublabel: 'text or link', col: 0, row: 1, kind: 'input' },
-        { id: 'retr', label: 'Source retrieval', sublabel: 'multi-source search', col: 1, row: 1, kind: 'compute' },
-        { id: 's1', label: 'Source', sublabel: 'scored on its own', col: 2, row: 0, kind: 'store' },
-        { id: 's2', label: 'Source', sublabel: 'scored on its own', col: 2, row: 1, kind: 'store' },
-        { id: 's3', label: 'Source', sublabel: 'scored on its own', col: 2, row: 2, kind: 'store' },
-        { id: 'score', label: 'Weighted validation', sublabel: 'per-source weights', col: 3, row: 1, kind: 'compute' },
-        { id: 'verdict', label: 'Hoax / valid %', col: 4, row: 0, kind: 'output' },
-        { id: 'map', label: 'Reasoning mind-map', sublabel: 'animated, interactive', col: 4, row: 1, kind: 'output' },
+        { id: 'claim', label: 'Claim', sublabel: 'text · IG link · screenshot', col: 0, row: 1, kind: 'input' },
+        { id: 'n8n', label: 'n8n', sublabel: 'intake workflow', col: 1, row: 1, kind: 'service' },
+        { id: 'meta', label: 'Meta Graph API', sublabel: 'Instagram content', col: 1, row: 0, kind: 'service' },
+        { id: 'go', label: 'Agent orchestrator', sublabel: 'Go', col: 2, row: 1, kind: 'compute' },
+        { id: 'reg', label: 'BEI · OJK agent', sublabel: 'regulator & exchange', col: 3, row: 0, kind: 'model' },
+        { id: 'media', label: 'Media agents', sublabel: 'CNBC · Kontan · Bisnis', col: 3, row: 1, kind: 'model' },
+        { id: 'crowd', label: 'Sentiment + analyst', sublabel: 'retail · market', col: 3, row: 2, kind: 'model' },
+        { id: 'db', label: 'Supabase', sublabel: 'post · think trace', col: 4, row: 1, kind: 'store' },
+        { id: 'graph', label: 'Live knowledge graph', sublabel: 'force-directed', col: 5, row: 0, kind: 'output' },
+        { id: 'verdict', label: 'Verdict', sublabel: 'valid · hoax · uncertain', col: 5, row: 1, kind: 'output' },
       ],
       edges: [
-        { from: 'claim', to: 'retr' },
-        { from: 'retr', to: 's1' },
-        { from: 'retr', to: 's2' },
-        { from: 'retr', to: 's3' },
-        { from: 's1', to: 'score' },
-        { from: 's2', to: 'score' },
-        { from: 's3', to: 'score' },
-        { from: 'score', to: 'verdict' },
-        { from: 'score', to: 'map' },
+        { from: 'claim', to: 'n8n' },
+        { from: 'n8n', to: 'meta', dashed: true, label: 'IG links' },
+        { from: 'n8n', to: 'go' },
+        { from: 'go', to: 'reg' },
+        { from: 'go', to: 'media' },
+        { from: 'go', to: 'crowd' },
+        { from: 'reg', to: 'db' },
+        { from: 'media', to: 'db' },
+        { from: 'crowd', to: 'db' },
+        { from: 'db', to: 'graph' },
+        { from: 'db', to: 'verdict' },
       ],
-      flow: ['claim', 'retr', 's2', 'score', 'map'],
+      flow: ['claim', 'n8n', 'go', 'media', 'db', 'verdict'],
       spine: [
-        { label: 'Claim', kind: 'input' },
-        { label: 'Source retrieval', kind: 'compute' },
-        { label: 'Weighted scoring', kind: 'compute' },
-        { label: 'Verdict + mind-map', kind: 'output' },
+        { label: 'Claim', sublabel: 'text · IG · screenshot', kind: 'input' },
+        { label: 'n8n + Go', sublabel: 'orchestration', kind: 'compute' },
+        { label: 'Six agents', sublabel: 'in parallel', kind: 'model' },
+        { label: 'Verdict + graph', kind: 'output' },
       ],
     },
     caseStudy: {
       whatItIs:
-        'You give NusaVerify a claim. It searches across sources, weighs what each one is worth, and returns a hoax/validity probability – together with an animated mind-map of how it arrived there.',
+        'NusaVerify checks investment information before you act on it. You paste a claim – "this robot trading guarantees 20% a week", "BBCA is about to announce a jumbo dividend", an Instagram post from a stock influencer, a screenshot from a Telegram "cuan" group – and six AI agents search the stock exchange (BEI), the financial regulator (OJK), the financial press and retail sentiment at the same time. You get back a verdict – verified, misinformation or unconfirmed – with a confidence score, a plain-language explanation, and a live knowledge graph of every source that moved the number.',
       problem:
-        'A verdict without reasoning is just another authority to trust. For misinformation that spreads precisely because people cannot check it themselves, showing the work matters more than the score does.',
+        'Indonesia\'s new retail investors learn about markets from Instagram, TikTok and Telegram groups, which is exactly where pump-and-dump calls, fake corporate actions and illegal investment schemes spread. The information needed to check them already exists – exchange disclosures, OJK\'s list of illegal entities, the financial press – but it is scattered across sites a beginner does not know to open, and a rumour moves faster than anyone can read all of them.',
       story: [
         {
-          title: "Built in a hackathon, around one argument",
+          title: 'From fact-checking to the place misinformation costs money',
           body: [
-            "Bank Indonesia's hackathon set the clock; the argument set the design. A fact-checker that returns a verdict and nothing else has not solved misinformation – it has added one more authority you are expected to take on faith, aimed at exactly the people who are least able to check things for themselves.",
-            "So the reasoning chain, not the score, became the product. The number is a summary of the work; the work is the part you are allowed to disagree with.",
+            'The first version was a general-purpose hoax detector: politics, science, the claims that fill a family WhatsApp group. It worked, but it competed with every fact-checking site in the country, and the cost of believing a wrong claim was abstract.',
+            'For the Bank Indonesia hackathon I narrowed it to investment information – stocks, crypto, forex, gold and macro – where a believed rumour has a price tag. Every source, every agent persona and every verdict label was rewritten for that domain: "hoax" became "misinformation", and "uncertain" became "unconfirmed – be careful".',
           ],
-          pullQuote:
-            "A verdict without reasoning is just another authority to trust.",
+          pullQuote: 'Check first, then believe.',
         },
         {
-          title: "Designing the output changed the backend",
+          title: 'Six agents, scored separately',
           body: [
-            "The mind-map was supposed to be presentation. Once it had to be real and interactive, every scoring step had to become an addressable object with a source, a weight and a contribution – not a sentence buried in a paragraph of model prose.",
-            "That constraint improved the system. Sources are scored separately and combined afterwards, so when two of them disagree the disagreement stays visible instead of being averaged into a confident, wrong answer.",
-            "TODO(vico): how far the project got in the hackathon, and anything you measured against a test set.",
+            'One model asked whether a claim is true is confidently wrong in exactly the cases that matter. So the work is split: an agent for the exchange and the regulator, agents for CNBC Indonesia, Kontan and Bisnis Indonesia, one reading retail sentiment, and a market analyst that pulls the findings together. Each one scores the claim on its own scale from supporting to refuting.',
+            'Keeping them separate is what makes the result honest. When retail sentiment is full of "already withdrawn my profit" testimonials while OJK has the entity on its illegal list, that disagreement is the most useful thing to show – and it would disappear if everything were averaged into one sentence.',
+          ],
+        },
+        {
+          title: 'Making the reasoning watchable',
+          body: [
+            'A check takes long enough that a spinner would lose the user. Instead, every agent writes its intermediate findings into Supabase as it goes, and the page polls that trace: the knowledge graph grows node by node while the sources are being explored, collapses into an agent-to-agent conversation during cross-analysis, and resolves into the verdict card when the run completes.',
+            'That turned the waiting time into the explanation. By the time the verdict appears, the user has already watched which sources supported it and which did not.',
           ],
         },
       ],
       decisions: [
         {
-          decision: 'Weighted-average validation across sources, not a single model judgment',
-          why: 'One model asked whether something is true is confidently wrong in exactly the cases that matter. Scoring each source separately and combining them afterwards keeps disagreement visible instead of collapsing it into one answer.',
-          tradeoff: 'The weights are a judgement call, and a wrong weight is harder to notice than a wrong answer.',
+          decision: 'Go for the agent orchestration layer',
+          why: 'A check is six agents waiting on network calls at the same time. Goroutines make that fan-out cheap and explicit, and a single compiled service is easy to deploy next to the workflow engine.',
+          tradeoff:
+            'A thinner AI ecosystem than Python, so prompt handling and agent plumbing are written by hand.',
         },
         {
-          decision: 'The reasoning chain rendered as an interactive mind-map',
-          why: 'The chain is the product. A user who can see which source moved the number can disagree with the verdict for a specific reason instead of dismissing it wholesale.',
+          decision: 'n8n for intake and integrations, code for the reasoning',
+          why: 'Receiving a claim, normalising text, images and links, and calling external services is integration work that changes often – a visual workflow makes it fast to rewire during a hackathon. The part that has to be precise, the agents and their scoring, stays in Go.',
           tradeoff:
-            'Every intermediate step has to be emitted as structured data rather than prose, which constrains how the model is allowed to answer.',
+            'Logic lives in two places, so a bug can sit on either side of the webhook boundary.',
         },
         {
-          decision: 'Next.js end to end, deployed on Vercel',
-          why: 'A hackathon budget is measured in hours. One framework, one deploy target, no infrastructure to argue with.',
+          decision: 'Meta Graph API (GraphQL) to read Instagram posts',
+          why: 'Much of the misinformation arrives as an Instagram post, not as text. Pulling the caption and media through Meta\'s official Graph API means the agents check what the post actually says rather than whatever the user managed to copy.',
           tradeoff:
-            'Retrieval runs inside the same app that renders it, which is fine at demo scale and would not stay fine.',
+            'Access depends on Meta Business app permissions and review, which is a dependency outside the codebase.',
+        },
+        {
+          decision: 'Supabase as the shared trace, polled by the browser',
+          why: 'Agents write intermediate state – exploring, analyzing, completed – into a `think` table. The front end only has to read it, which keeps the Next.js app thin and lets anyone reopen a running check from its URL.',
+          tradeoff:
+            'Polling every few seconds is less elegant than a push channel, and the table schema is tied to the current set of sources.',
+        },
+        {
+          decision: 'A signed confidence score, not a percentage of truth',
+          why: 'Confidence runs from -100 (leans misinformation) to +100 (leans verified). The sign carries the direction and the magnitude carries how sure the agents are, so "uncertain but leaning hoax" can be shown instead of forced into a binary.',
+          tradeoff: 'One more concept the interface has to teach in a single glance.',
         },
       ],
       results: [
-        'Live at nusaverify-web.vercel.app.',
-        'The full reasoning chain is inspectable – every source and its contribution to the score.',
-        'TODO(vico): how far the project went in the Bank Indonesia hackathon, and any measured accuracy on a test set.',
+        'Live at nusaverify-web.vercel.app, covering stocks, crypto, forex, gold and macro claims.',
+        'Accepts plain text, Instagram links and screenshots, with an optional ticker such as $BBCA or BTC.',
+        'Six agents run in parallel across BEI/OJK, CNBC Indonesia, Kontan, Bisnis Indonesia, retail sentiment and a market analyst.',
+        'Every check produces an inspectable trace: an interactive knowledge graph, the agents\' cross-analysis and a verdict with source links.',
+        'Clearly framed as information validation, not investment advice.',
       ],
       reflection:
-        'Building the explanation surface first changed the backend. Once the mind-map had to be real, every scoring step had to become an addressable object – a better architecture than the one I would have written if the output had only ever been a number.',
+        'Narrowing the domain did more for the product than any model change. Once the claims were about money, the sources became obvious, the verdict labels became sharper, and the reasoning trace stopped being decoration – an investor deciding whether to buy needs to see why. If I rebuilt it, I would make the source list dynamic from the start instead of one column per outlet, so adding a new regulator or exchange is data, not a migration.',
+    },
+  },
+
+  {
+    slug: 'acep',
+    name: 'ACEP',
+    year: '2026',
+    role: 'CTO & co-founder – two-person company',
+    status: 'live',
+    featured: true,
+    order: 4,
+    oneLiner:
+      'Advanced Clean Energy Planning: a solar-and-battery planner that tells off-grid industries, day by day, whether their power supply will hold – before the diesel runs out.',
+    outcome:
+      'Top 6 finalist, Ideanation – IPB Business Plan Competition 2026. Working prototype live at acep-prototype.vercel.app.',
+    stack: [
+      'Next.js',
+      'React',
+      'TypeScript',
+      'Tailwind CSS',
+      'Supabase',
+      'PostgreSQL',
+      'Open-Meteo API',
+      'n8n',
+      'WebGL',
+      'Vercel',
+    ],
+    categories: ['Product & business', 'Frontend', 'AI Engineering'],
+    links: {
+      live: 'https://acep-prototype.vercel.app/',
+      repo: 'https://github.com/VicoAritonang/acep-2',
+    },
+    diagram: {
+      caption:
+        'Loads, generators and batteries go in once; the weather forecast changes every day. The planner carries the battery forward one day at a time and colours the calendar.',
+      nodes: [
+        { id: 'loads', label: 'Electrical loads', sublabel: 'equipment · kW · hours', col: 0, row: 0, kind: 'input' },
+        { id: 'plants', label: 'Solar generators', sublabel: 'units · rated power', col: 0, row: 1, kind: 'input' },
+        { id: 'storage', label: 'Battery storage', sublabel: 'capacity · charge', col: 0, row: 2, kind: 'input' },
+        { id: 'db', label: 'Supabase', sublabel: 'auth · Postgres', col: 1, row: 1, kind: 'store' },
+        { id: 'meteo', label: 'Open-Meteo', sublabel: '14-day forecast', col: 1, row: 0, kind: 'service' },
+        { id: 'calc', label: 'Energy planner', sublabel: 'daily carry-over', col: 2, row: 1, kind: 'compute' },
+        { id: 'cal', label: 'Energy calendar', sublabel: 'safe · warning · short', col: 3, row: 1, kind: 'output' },
+        { id: 'bot', label: 'ACEP Assistant', sublabel: 'n8n · LLM', col: 3, row: 2, kind: 'model' },
+      ],
+      edges: [
+        { from: 'loads', to: 'db' },
+        { from: 'plants', to: 'db' },
+        { from: 'storage', to: 'db' },
+        { from: 'meteo', to: 'calc', label: 'predicted kWh' },
+        { from: 'db', to: 'calc' },
+        { from: 'calc', to: 'cal' },
+        { from: 'db', to: 'bot', dashed: true },
+      ],
+      flow: ['plants', 'db', 'calc', 'cal'],
+      spine: [
+        { label: 'Loads · panels · batteries', kind: 'input' },
+        { label: '14-day forecast', sublabel: 'Open-Meteo', kind: 'service' },
+        { label: 'Energy planner', kind: 'compute' },
+        { label: 'Energy calendar', kind: 'output' },
+      ],
+    },
+    caseStudy: {
+      whatItIs:
+        'ACEP (Advanced Clean Energy Planning) is a web platform for running a remote site on solar power. An operator records the equipment that draws power, the solar generators and the battery bank; ACEP combines that with a 14-day weather forecast for the site and colours an energy calendar – green where the supply is safe, amber where it depends on the sun showing up, red where it will fall short. An AI assistant answers planning questions in Indonesian along the way.',
+      problem:
+        'Mines, plantations, fisheries and facilities on Indonesia\'s outer islands often sit beyond the reach of the PLN grid, so they run on diesel generators – expensive to ship in, loud, and carbon-heavy. Solar is the obvious alternative, but installing panels is not the hard part. The hard part is knowing whether the supply will hold on a cloudy week and through every night, and almost nobody on these sites has a tool to answer that.',
+      story: [
+        {
+          title: 'A business plan that needed a working product',
+          body: [
+            'ACEP started as an entry to Ideanation, the business plan track of the IPB Business Plan Competition. The thesis was a SaaS model for remote industries moving off diesel – and a business plan about planning software is only as convincing as the planner behind it.',
+            'ACEP is a two-person company, and as CTO the product side was mine: architecture, data model, the planning logic and the web app. Instead of mock-ups, the pitch was backed by a running prototype – accounts, a real database of equipment and storage, live forecasts and a dashboard a judge could click through. ACEP reached the final six.',
+          ],
+          pullQuote: 'Installing panels is easy. Knowing the power will still be there on a cloudy Thursday night is the product.',
+        },
+        {
+          title: 'One honest rule, applied one day at a time',
+          body: [
+            'The planner deliberately uses a rule an operator can check by hand. For each day: if the battery alone covers the scheduled load, the day is safe. If it only works once that day\'s solar generation is added, it is a warning – the plan depends on the weather. If even both together fall short, the day is marked insufficient.',
+            'What makes it useful is the carry-over. Whatever the battery holds at the end of one day, capped at its capacity, is what it starts the next with. A single overcast day rarely matters; three in a row is where a site goes dark, and the calendar shows that run of amber turning red before it happens.',
+          ],
+        },
+        {
+          title: 'Weather turns a static plan into a forecast',
+          body: [
+            'Hourly weather codes from Open-Meteo are grouped into days and translated into an expected generation level, from clear skies down to storms. That is what moves the calendar from "your system is sized correctly on average" to "next Tuesday is the day to cut non-essential load".',
+            'An assistant connected through n8n sits on the dashboard for the questions a calendar cannot answer – what a status means, how to adjust a schedule – and every conversation is stored per user.',
+          ],
+        },
+      ],
+      decisions: [
+        {
+          decision: 'A transparent threshold rule instead of an opaque model',
+          why: 'Operators who have relied on diesel for years will not trust a black box with their power supply. Safe, warning and insufficient are defined by comparisons they can redo on paper: storage against load, then storage plus generation against load.',
+          tradeoff:
+            'It ignores intra-day timing – a battery that is full at noon but empty at 3 a.m. still reads as one daily total.',
+        },
+        {
+          decision: 'Battery state carried across days',
+          why: 'Energy shortfalls are cumulative. Simulating each day from the previous day\'s ending charge is what exposes the multi-day cloudy spells that actually cause outages.',
+          tradeoff: 'A wrong assumption early in the window compounds through every day after it.',
+        },
+        {
+          decision: 'Open-Meteo for the 14-day forecast',
+          why: 'Free, key-less and global, with hourly weather codes for any coordinate – which matters when the sites are remote islands rather than cities.',
+          tradeoff:
+            'Weather codes are a coarse proxy for solar irradiance, so expected generation is banded rather than physically modelled.',
+        },
+        {
+          decision: 'Supabase for auth and data, n8n for the assistant',
+          why: 'In a competition timeline, accounts, row-level data per user and a hosted Postgres come for free, and the AI assistant can be iterated in a workflow tool without redeploying the web app.',
+          tradeoff:
+            'The assistant\'s behaviour lives outside the repository, so it is versioned separately from the code that calls it.',
+        },
+      ],
+      results: [
+        'Top 6 finalist, Ideanation – IPB Business Plan Competition 2026.',
+        'Working prototype live at acep-prototype.vercel.app, with a one-click demo account for judges.',
+        'Equipment loads, solar generators and battery storage managed per user, backed by Supabase.',
+        'Day-by-day energy calendar for the next 14 days, driven by live Open-Meteo forecasts.',
+        'Built-in Indonesian-language AI assistant, connected through n8n, with stored chat history.',
+        'The business plan projected up to 60% lower operating costs and up to 75% lower emissions for a site moving from diesel to planned solar.',
+      ],
+      reflection:
+        'Building the prototype changed the pitch. Once judges could watch a cloudy week turn the calendar from green to red, the business case did not need to be argued – it was on the screen. The next step would be to replace weather-code bands with irradiance data and hourly simulation, so the planner can say not just which day is at risk, but which hour.',
     },
   },
 
@@ -377,7 +540,7 @@ export const projects: Project[] = [
     role: 'Researcher – Universitas Indonesia',
     status: 'research',
     featured: false,
-    order: 4,
+    order: 5,
     oneLiner:
       'When should a robot tutor teach, rest, or push harder? Formalised as a 1,440-state Markov Decision Process and solved with deep reinforcement learning.',
     outcome:
@@ -474,7 +637,7 @@ export const projects: Project[] = [
     role: 'Engineer',
     status: 'live',
     featured: false,
-    order: 5,
+    order: 6,
     oneLiner: 'An export-facilitation platform helping Indonesian MSMEs reach buyers outside the country.',
     outcome:
       'Top 50 Finalist, 1000x Innovation Challenge – Marvin Foundation with Universitas Indonesia and DSX Ventures.',
@@ -490,7 +653,7 @@ export const projects: Project[] = [
     role: 'Author',
     status: 'archived',
     featured: false,
-    order: 6,
+    order: 7,
     oneLiner: 'A small Go service for automating outbound email as part of a larger workflow.',
     outcome: 'Written to remove a manual step that kept reappearing across projects.',
     stack: ['Go'],
@@ -505,7 +668,7 @@ export const projects: Project[] = [
     role: 'Designer & engineer',
     status: 'live',
     featured: false,
-    order: 7,
+    order: 8,
     oneLiner:
       'This site. Statically rendered Next.js, with the architecture diagrams drawn from data rather than exported as images.',
     outcome: 'Live at vicoworks.com.',

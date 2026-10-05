@@ -10,7 +10,7 @@ import { FEATURED_PROJECTS, PROFILE } from './home';
 export const ABOUT = {
   intro: [
     "I'm Vico – an AI engineer based in Jakarta, Indonesia. I build agentic AI systems: LLM agents that call real tools, RAG pipelines that cite their sources, and the Go services and cloud infrastructure that keep them running.",
-    "I co-founded Avagenc, where a single chat interface orchestrates agents across Gmail, Calendar, Contacts, smart-home devices and Spotify. I also built Datafact, a fully serverless GenAI product on AWS, and NusaVerify, a hoax-detection engine built for a Bank Indonesia hackathon.",
+    "I co-founded Avagenc, where a single chat interface orchestrates agents across Gmail, Calendar, Contacts, smart-home devices and Spotify. I also built Datafact, a fully serverless GenAI product on AWS; NusaVerify, a multi-agent verifier for investment rumours built for a Bank Indonesia hackathon; and ACEP, a solar-energy planner for off-grid industries, where I'm CTO of a two-person company and which reached the top 6 of the IPB Business Plan Competition 2026.",
     "I'm studying Information Systems at Universitas Indonesia, and I'm open to internships, freelance work and full-time roles.",
   ],
   principles: [
@@ -30,7 +30,7 @@ export const ABOUT = {
     },
     {
       q: 'What has Vico Aritonang built?',
-      a: 'His main projects are Avagenc, a multi-agent assistant that acts across Gmail, Google Calendar, Contacts, Spotify and smart-home devices; Datafact, a fully serverless GenAI product on AWS; and NusaVerify, an AI hoax-detection engine built for a Bank Indonesia hackathon. Each has a case study on this site.',
+      a: 'His main projects are Avagenc, a multi-agent assistant that acts across Gmail, Google Calendar, Contacts, Spotify and smart-home devices; Datafact, a fully serverless GenAI product on AWS; NusaVerify, a multi-agent AI verifier for investment information built for a Bank Indonesia hackathon; and ACEP, a solar-and-battery planning platform for off-grid industries, where he is CTO of a two-person company – a top 6 finalist at the IPB Business Plan Competition 2026. Each has a case study on this site.',
     },
     {
       q: 'What is Vico Aritonang’s tech stack?',
