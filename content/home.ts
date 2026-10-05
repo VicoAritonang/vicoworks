@@ -229,6 +229,7 @@ export const FEATURED_PROJECTS: FeaturedProject[] = [
       'Next.js on Vercel',
     ],
     mock: 'export',
+    image: '/project-snapshoot/handler/homepage.png',
   },
 ];
 
