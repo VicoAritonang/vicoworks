@@ -1,5 +1,14 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+Project SEO audit, keyword targets, and post-deployment steps: [SEO-NOTES.md](./SEO-NOTES.md).
+
+Check rendered project SEO locally or after deployment:
+
+```bash
+npm run seo:check -- http://localhost:3000
+npm run seo:check -- https://vicoworks.com
+```
+
 ## Getting Started
 
 First, run the development server:

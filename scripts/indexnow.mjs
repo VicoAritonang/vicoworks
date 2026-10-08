@@ -1,7 +1,8 @@
 /**
  * Pings IndexNow (Bing, Yandex, Naver, Seznam…) with every URL in the live
- * sitemap. Bing's index feeds ChatGPT search and Copilot, so this is how a new
- * page or post reaches AI answers within hours instead of weeks.
+ * sitemap. This notifies participating search engines of changes; it does
+ * not guarantee indexing, ranking or inclusion in an AI answer. It does not
+ * submit a Google indexing request.
  *
  * Run after each production deploy:  npm run indexnow
  * The key file lives at public/a7bde5ce7766f61f141adaa0e0b6544e.txt and must stay deployed.

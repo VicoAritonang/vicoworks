@@ -15,18 +15,16 @@ import { caseStudySlugs } from '@/content/caseStudies';
  */
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const now = new Date();
-
+  // Omit lastModified unless an actual content date is known. Deploy time
+  // is not a content update and should not change every URL's lastmod.
   return [
     {
       url: SITE_URL,
-      lastModified: now,
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
       url: `${SITE_URL}/projects`,
-      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.8,
     },
@@ -42,13 +40,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ['/legal/terms', 0.1],
     ].map(([path, priority]) => ({
       url: `${SITE_URL}${path}`,
-      lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: priority as number,
     })),
     ...caseStudySlugs.map((slug) => ({
       url: `${SITE_URL}/projects/${slug}`,
-      lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.7,
     })),

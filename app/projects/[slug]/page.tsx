@@ -8,7 +8,7 @@ import { ProjectMock } from '@/components/home/ProjectMock';
 import { caseStudySlugs, getProject } from '@/content/caseStudies';
 import { publishable } from '@/content/caseStudyTypes';
 import { FEATURED_PROJECTS } from '@/content/home';
-import { SITE_URL } from '@/lib/seo';
+import { projectMetadata, projectStructuredData } from '@/lib/projectSeo';
 
 export const dynamicParams = false;
 
@@ -21,14 +21,8 @@ const FALLBACK_GRADIENT = 'linear-gradient(145deg, #1e293b 0%, #475569 40%, #94a
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const p = getProject((await params).slug);
-  if (!p) return {};
-  const title = `${p.name} – case study by Vico Aritonang`;
-  return {
-    title,
-    description: `${p.oneLiner} Built by Vico Aritonang, AI engineer in Indonesia.`,
-    alternates: { canonical: `/projects/${p.slug}` },
-    openGraph: { type: 'article', title, description: p.oneLiner, url: `${SITE_URL}/projects/${p.slug}` },
-  };
+  if (!p?.caseStudy) notFound();
+  return projectMetadata(p);
 }
 
 export default async function CaseStudyPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -41,38 +35,11 @@ export default async function CaseStudyPage({ params }: { params: Promise<{ slug
   const index = caseStudySlugs.indexOf(p.slug);
   const next = getProject(caseStudySlugs[(index + 1) % caseStudySlugs.length])!;
 
-  const url = `${SITE_URL}/projects/${p.slug}`;
-  const jsonLd = [
-    {
-      '@context': 'https://schema.org',
-      '@type': p.status === 'research' ? 'ScholarlyArticle' : 'CreativeWork',
-      '@id': `${url}#work`,
-      name: p.name,
-      headline: `${p.name} – case study`,
-      description: p.oneLiner,
-      abstract: cs.whatItIs,
-      url,
-      author: { '@id': `${SITE_URL}/#vico` },
-      creator: { '@id': `${SITE_URL}/#vico` },
-      temporalCoverage: p.year,
-      keywords: [...p.stack, ...p.categories].join(', '),
-      ...(p.links.live ? { sameAs: p.links.live } : {}),
-      inLanguage: 'en',
-    },
-    {
-      '@context': 'https://schema.org',
-      '@type': 'BreadcrumbList',
-      itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Vico Aritonang', item: SITE_URL },
-        { '@type': 'ListItem', position: 2, name: 'Projects', item: `${SITE_URL}/projects` },
-        { '@type': 'ListItem', position: 3, name: p.name, item: url },
-      ],
-    },
-  ];
+  const jsonLd = projectStructuredData(p);
 
   return (
     <PageShell eyebrow={`Case study · ${p.year}`} title={p.name} description={p.oneLiner}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
 
       {/* Breadcrumb, visible as well as in schema. */}
       <nav aria-label="Breadcrumb" className="mb-8 font-mono text-xs text-muted uppercase">

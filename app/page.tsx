@@ -52,6 +52,7 @@ export default function Home() {
       position: i + 1,
       item: {
         '@type': 'CreativeWork',
+        ...(p.caseStudy ? { '@id': `${SITE_URL}/projects/${p.slug}#work` } : {}),
         name: p.name,
         description: p.body,
         url: p.caseStudy ? `${SITE_URL}/projects/${p.slug}` : p.href,

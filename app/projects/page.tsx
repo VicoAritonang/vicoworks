@@ -51,6 +51,13 @@ export default async function ProjectsPage() {
     inLanguage: 'en-ID',
     isPartOf: { '@id': `${SITE_URL}/#website` },
     about: { '@id': `${SITE_URL}/#vico` },
+    hasPart: caseStudySlugs.map((slug) => ({
+      '@type': 'WebPage',
+      '@id': `${SITE_URL}/projects/${slug}#page`,
+      url: `${SITE_URL}/projects/${slug}`,
+      name: getProject(slug)!.name,
+      mainEntity: { '@id': `${SITE_URL}/projects/${slug}#work` },
+    })),
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: projects.length,
